@@ -975,11 +975,14 @@ function calcScores(){ return saved._calc?.scores||null; }
 /* Setup (one-time): open your sheet → Extensions → Apps Script → paste:
 
 function doPost(e){
+  var sh=SpreadsheetApp.openById('1rGpxfXJA5499kgLsb44zglEC4ZIrCI7E2VU1L34RkHw').getSheets()[0];
+  if(sh.getLastRow()===0) sh.appendRow(['Timestamp','UserID','IP','City','Region','Country',
+    'P1 Name','P1 DOB','P1 Time','P2 Name','P2 DOB','P2 Time',
+    'Guna/36','Total/100','A/30','B/30','C/20','D/20','Verdict']);
   var d=JSON.parse(e.postData.contents);
-  SpreadsheetApp.openById('1rGpxfXJA5499kgLsb44zglEC4ZIrCI7E2VU1L34RkHw')
-    .getSheets()[0].appendRow([new Date(),d.userId,d.ip,d.city,d.region,d.country,
-      d.p1name,d.p1dob,d.p1time,d.p2name,d.p2dob,d.p2time,
-      d.guna,d.total,d.A,d.B,d.C,d.D,d.verdict]);
+  sh.appendRow([new Date(),d.userId,d.ip,d.city,d.region,d.country,
+    d.p1name,d.p1dob,d.p1time,d.p2name,d.p2dob,d.p2time,
+    d.guna,d.total,d.A,d.B,d.C,d.D,d.verdict]);
   return ContentService.createTextOutput('ok');
 }
 
