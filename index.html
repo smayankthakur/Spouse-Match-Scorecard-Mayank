@@ -10,6 +10,7 @@
 <meta property="og:type" content="website">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://ipapi.co https://script.google.com https://script.googleusercontent.com; base-uri 'self'; form-action 'self'">
 <title>Spouse Match Scorecard — Astro-Gyani Calculator</title>
+<link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23050510'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='%23e9c46a' font-family='serif'%3E%E0%A5%90%3C/text%3E%3C/svg%3E">
 <style>
   :root{
     --ink:#eef0ff;--muted:#a5a3c8;--gold:#e9c46a;--gold-d:#b8860b;
@@ -150,6 +151,40 @@
   .scrub-desc{color:var(--muted);font-size:14.5px;max-width:440px;margin:14px auto 0;min-height:44px;transition:opacity .25s}
   .scrub-desc.swap{opacity:0}
   .scrub-max{font-size:12px;letter-spacing:2px;color:var(--gold);margin-top:10px;text-transform:uppercase}
+
+  /* ── Nav bar + fullscreen menu ─────────────── */
+  #navBar{position:fixed;top:0;left:0;right:0;z-index:94;display:flex;align-items:center;justify-content:space-between;
+    padding:12px 20px;pointer-events:none}
+  #navLogo{font-size:24px;color:var(--gold);pointer-events:auto;text-decoration:none;line-height:1;
+    filter:drop-shadow(0 0 10px rgba(233,196,106,.5));transition:transform .3s}
+  #navLogo:hover{transform:scale(1.12)}
+  #menuBtn{pointer-events:auto;padding:0 18px;height:44px;border-radius:99px;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:1px;
+    border:1px solid var(--stroke);background:rgba(20,18,42,.75);color:var(--gold);
+    display:flex;align-items:center;justify-content:center;transition:border-color .3s,box-shadow .3s,transform .2s}
+  #menuBtn:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(233,196,106,.4);transform:scale(1.06)}
+  #menuOverlay{position:fixed;inset:0;z-index:100;background:rgba(5,5,16,.94);
+    backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    opacity:0;pointer-events:none;transition:opacity .4s}
+  #menuOverlay.open{opacity:1;pointer-events:auto}
+  #menuOverlay a{font-size:clamp(20px,4.5vw,36px);font-weight:800;color:var(--ink);text-decoration:none;
+    padding:9px 20px;opacity:0;transform:translateY(26px);
+    transition:opacity .5s cubic-bezier(.22,1,.36,1) calc(var(--i)*70ms),transform .5s cubic-bezier(.22,1,.36,1) calc(var(--i)*70ms),color .25s}
+  #menuOverlay.open a{opacity:1;transform:none}
+  #menuOverlay a:hover{color:var(--gold)}
+  #menuOverlay a .mnum{font-size:12px;color:var(--gold);letter-spacing:2px;vertical-align:super;margin-right:10px;opacity:.8}
+  #menuClose{position:absolute;top:16px;right:20px;width:46px;height:46px;border-radius:50%;cursor:pointer;font-size:17px;
+    border:1px solid var(--stroke);background:transparent;color:var(--muted);transition:color .3s,border-color .3s,transform .3s}
+  #menuClose:hover{color:var(--gold);border-color:var(--gold);transform:rotate(90deg)}
+  #menuOm{font-size:34px;color:var(--gold);margin-bottom:14px;opacity:.85;filter:drop-shadow(0 0 14px rgba(233,196,106,.5))}
+
+  /* ── Remedies ──────────────────────────────── */
+  .remedy-item{padding:13px 4px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .remedy-item:last-child{border-bottom:none}
+  .remedy-item h4{margin:0 0 5px;font-size:14px;color:var(--gold)}
+  .remedy-item p{margin:0;font-size:13px;color:var(--muted);line-height:1.55}
+  .remedy-item.walk h4{color:var(--bad)}
+  .remedy-item.bless h4{color:var(--good)}
 
   /* ── Back to top (animated) ────────────────── */
   #toTop{position:fixed;right:22px;bottom:62px;z-index:95;width:52px;height:52px;border-radius:50%;cursor:pointer;
@@ -369,7 +404,7 @@
     body{background:#fff;color:#22203a}
     body::before,.orb,.hud,.toolbar,#stars,.mandala,.ornament,.banner,.form-card,.err,
     #grain,#vignette,#secCounter,.scrub,.statement,.scene,.scroll-cue,.hero-cta,
-    .nebula,.aurora,.shoot,#scrollProgress,#scrollPct,#toTop,.godrays,.dawn{display:none!important}
+    .nebula,.aurora,.shoot,#scrollProgress,#scrollPct,#toTop,.godrays,.dawn,#navBar,#menuOverlay{display:none!important}
     .hero{min-height:auto;width:auto;margin-left:0;padding:20px 0}
     h1.display .line i,.hero .sub,.eyebrow{animation:none;opacity:1;transform:none;color:#3a2f66;-webkit-text-fill-color:#3a2f66}
     section.card,#verdict,.use,.gate,#astro-summary{background:#fff;border:1px solid #ddd;box-shadow:none;backdrop-filter:none;break-inside:avoid;color:#22203a}
@@ -397,6 +432,20 @@
 <div id="scrollPct"><b id="scrollPctNum">0%</b></div>
 <div id="secCounter"><b id="secCounterNum">01</b>&nbsp;/&nbsp;<span id="secCounterTotal">08</span></div>
 <button id="toTop" aria-label="Back to top" title="Back to top"><span class="arr">↑</span><span class="lbl">ॐ top</span></button>
+
+<header id="navBar">
+  <a id="navLogo" href="#hero" aria-label="Home">ॐ</a>
+  <button id="menuBtn" aria-label="Open menu">☰ &nbsp;Menu</button>
+</header>
+<nav id="menuOverlay" aria-label="Section menu">
+  <button id="menuClose" aria-label="Close menu">✕</button>
+  <div id="menuOm">ॐ</div>
+  <a href="#sec-A" style="--i:0"><span class="mnum">01</span>Astrological Compatibility</a>
+  <a href="#sec-B" style="--i:1"><span class="mnum">02</span>Loyalty &amp; Constancy</a>
+  <a href="#sec-C" style="--i:2"><span class="mnum">03</span>Temperament &amp; Connection</a>
+  <a href="#sec-D" style="--i:3"><span class="mnum">04</span>Life, Family &amp; Presence</a>
+  <a href="#remedies" id="menuRemedies" style="--i:4;display:none"><span class="mnum">05</span>Remedies</a>
+</nav>
 
 <main class="page">
 
@@ -548,6 +597,33 @@
   </div>
 
   <div id="sections"></div>
+
+  <section class="card reveal" id="remedies" style="display:none">
+    <div class="banner">
+      <svg viewBox="0 0 800 96" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="bgR" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#4a2c10"/><stop offset="55%" stop-color="#6b3f14"/><stop offset="100%" stop-color="#2e1a08"/>
+        </linearGradient>
+        <radialGradient id="rflame" cx="50%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#fff3c4"/><stop offset="60%" stop-color="#e9c46a"/><stop offset="100%" stop-color="#b8600b"/>
+        </radialGradient></defs>
+        <rect width="800" height="96" fill="url(#bgR)"/>
+        <path d="M380 76 q6 -26 24 -26 q18 0 24 26z" fill="#b8860b"/>
+        <ellipse cx="404" cy="76" rx="30" ry="4.5" fill="#8a5f08"/>
+        <path d="M404 34 q9 11 0 20 q-9 -9 0 -20z" fill="url(#rflame)"/>
+        <circle cx="560" cy="48" r="26" fill="none" stroke="rgba(255,243,196,.5)" stroke-width="2" stroke-dasharray="2 7"/>
+        <text x="560" y="57" font-size="26" text-anchor="middle" fill="rgba(233,196,106,.95)" font-family="serif">ॐ</text>
+        <path d="M200 66 q10 -22 40 -22 q-6 8 -4 14 q14 -6 24 6 q-34 12 -60 2z" fill="rgba(255,243,196,.3)"/>
+        <g fill="rgba(255,255,255,.65)"><circle cx="90" cy="26" r="1.5"/><circle cx="300" cy="18" r="1.2"/><circle cx="680" cy="24" r="1.5"/><circle cx="730" cy="66" r="1.2"/></g>
+      </svg>
+      <div class="b-title">Upāya — The Path of Remedy</div>
+    </div>
+    <div class="sect-head">
+      <h2>R · Remedies <span style="text-transform:none;letter-spacing:0">— shown when the match is worth mending (65–95)</span></h2>
+      <div class="sect-score" id="remedyBadge">🪔</div>
+    </div>
+    <div id="remedyList"></div>
+  </section>
 
   <section class="statement" id="statement">
     <h2 id="stmtH">Some wait for destiny. Others calculate it.</h2>
@@ -866,6 +942,7 @@ const wrap=document.getElementById('sections');
 DATA.forEach(sec=>{
   const card=document.createElement('section');
   card.className='card reveal';
+  card.id='sec-'+sec.id;
   const b=BANNERS[sec.id];
   card.innerHTML=`
     <div class="banner">${b.svg}<div class="b-title">${b.label}</div></div>
@@ -1067,6 +1144,7 @@ function update(bumpSec){
   arc.style.stroke=band.color;
   arc.style.filter='drop-shadow(0 0 6px '+band.color+'80)';
   document.getElementById('hud').classList.toggle('glow',total>=65);
+  updateRemedies(total,touched);
 
   const gatePill=document.getElementById('gatePill');
   const gatePass=secB>=15;
@@ -1122,6 +1200,60 @@ function confetti(){
     setTimeout(()=>el.remove(),6000);
   }
 }
+
+/* ═══════════════ REMEDIES (65 < total < 95) ═══════════════ */
+let remedyShown=null;
+function updateRemedies(total,touched){
+  const sec=document.getElementById('remedies'), mi=document.getElementById('menuRemedies'),
+        list=document.getElementById('remedyList'), badge=document.getElementById('remedyBadge');
+  const hasCalc=!!saved._calc;
+  if(!hasCalc||!touched){
+    sec.style.display='none'; mi.style.display='none';
+    if(remedyShown!==false){ remedyShown=false; setTimeout(recalcLayout,60); }
+    return;
+  }
+  const inRange=total>65&&total<95;
+  mi.style.display=inRange?'':'none';
+  sec.style.display='';
+  sec.classList.add('in');
+  if(remedyShown!==inRange){ remedyShown=inRange; setTimeout(recalcLayout,60); }
+  if(!inRange){
+    badge.textContent=total<=65?'🛑':'✓';
+    list.innerHTML= total<=65
+      ? '<div class="remedy-item walk"><h4>🛑 No remedy advised — walk away</h4><p>Below 65, the foundation itself is weak. Tradition advises against patching a weak base with upāya — no ritual substitutes for compatibility. Walk away with grace, and trust that the right chart is still ahead.</p></div>'
+      : '<div class="remedy-item bless"><h4>✨ No remedies needed</h4><p>A match above 95 needs no correction — only gratitude. A Satyanārāyaṇa kathā in thanksgiving would be a beautiful beginning.</p></div>';
+    return;
+  }
+  badge.textContent='🪔 Upāya';
+  const K=saved._calc.meta.K, S=saved._calc.scores;
+  const mg=saved._calc.meta.g.manglik, mb=saved._calc.meta.b.manglik;
+  const R=[];
+  if(K.nadi===0)R.push(['Nāḍī Doṣa','Mahāmṛtyuñjaya jaap (108× daily for 40 days), a Nāḍī-doṣa nivāraṇa pūjā, and donation of grain and cloth. The heaviest doṣa — address it first.']);
+  if(K.bhakoot===0)R.push(['Bhakūṭa Doṣa','Viṣṇu Sahasranāma on Ekādaśī, a Bhakūṭa śānti pūjā, and strengthening of the Moon — a pearl may be considered after a jyotiṣī consultation.']);
+  if(K.gana<=1)R.push(['Gaṇa Mismatch','Gaurī-Śaṅkara pūjā performed together, joint Monday fasting, and deliberate patience practices through the first year.']);
+  if(mg.is!==mb.is)R.push(['Maṅgal Doṣa','Hanumān Chālīsā on Tuesdays, a Maṅgal śānti pūjā, and donation of masoor dal and red cloth. Families sometimes observe Kumbha-vivāha traditions beforehand.']);
+  if(K.maitri<=1)R.push(['Graha Maitrī Weak','Chant the beej mantras of both Moon-lords, and wear the colours of the friendlier lord on important shared days.']);
+  if((S.A6||0)<2)R.push(['Jupiter / Venus Support','Thursday: haldi and chana dal donation to strengthen Guru. Friday: white sweets and rice donation to strengthen Śukra.']);
+  if(!R.length)R.push(['General Blessing','No single doṣa dominates — the gap is spread thin. A Satyanārāyaṇa kathā before engagement and Gaṇeśa pūjā at each milestone will smooth the path.']);
+  R.push(['A Note on Upāya','Remedies are traditional supportive practices, not guarantees. Perform them with a family jyotiṣī\'s guidance — and pair every ritual with its worldly counterpart: honest conversation.']);
+  list.innerHTML=R.map(r=>'<div class="remedy-item"><h4>🪔 '+r[0]+'</h4><p>'+r[1]+'</p></div>').join('');
+}
+
+/* menu wiring */
+(function(){
+  const ov=document.getElementById('menuOverlay');
+  document.getElementById('menuBtn').addEventListener('click',()=>ov.classList.add('open'));
+  document.getElementById('menuClose').addEventListener('click',()=>ov.classList.remove('open'));
+  ov.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{
+    e.preventDefault();
+    ov.classList.remove('open');
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t) setTimeout(()=>t.scrollIntoView({behavior:'smooth',block:'start'}),80);
+  }));
+  document.getElementById('navLogo').addEventListener('click',e=>{
+    e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});
+  });
+})();
 
 function resetAll(){
   if(!confirm('Clear all inputs, calculations and ratings?')) return;
@@ -1212,7 +1344,7 @@ toTopBtn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'})
 let curY=window.scrollY, lastY=-1;
 let secTops=[], docH=1;
 function recalcLayout(){
-  secTops=secList.map(s=>s.offsetTop);
+  secTops=secList.map(s=>s.offsetParent!==null?s.offsetTop:Infinity); // hidden sections never win the counter
   docH=Math.max(1,document.documentElement.scrollHeight-window.innerHeight);
 }
 recalcLayout();
