@@ -986,6 +986,14 @@ function doPost(e){
   return ContentService.createTextOutput('ok');
 }
 
+// Run THIS from the editor to test (doPost gets no args when run manually):
+function testLog(){
+  doPost({postData:{contents:JSON.stringify({userId:'manual-test',ip:'0.0.0.0',
+    city:'Test',region:'-',country:'-',p1name:'Mayank',p1dob:'1998-11-19',p1time:'10:30',
+    p2name:'Test',p2dob:'2000-08-25',p2time:'14:15',
+    guna:24,total:74.5,A:29.5,B:12,C:15,D:18,verdict:'Strong'})}});
+}
+
    Deploy → New deployment → Web app → Execute as: Me → Access: Anyone,
    then paste the /exec URL below. */
 const SHEET_WEBAPP_URL='https://script.google.com/macros/s/AKfycbw9-jOK5iNp0yIoI1X3WzrSiV41JUhce9mCm1LtKDZwzPCb3wfx-pwmbG58PExK5idy/exec'; // e.g. 'https://script.google.com/macros/s/AKfyc.../exec'
