@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spouse Match Scorecard — Astro-Gyani Calculator</title>
+<style>
+  :root{
+    --ink:#eef0ff;--muted:#a5a3c8;--gold:#e9c46a;--gold-d:#b8860b;
+    --good:#4ade80;--warn:#fbbf24;--bad:#f87171;--purple:#c4b5fd;
+    --glass:rgba(255,255,255,.055);--glass-hi:rgba(255,255,255,.10);
+    --stroke:rgba(255,255,255,.12);--stroke-hi:rgba(233,196,106,.45);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.5;
+    background:#0b0a1a;overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-3;
+    background:
+      radial-gradient(900px 600px at 15% 10%,#1c1540 0%,transparent 60%),
+      radial-gradient(800px 600px at 85% 25%,#2e1733 0%,transparent 60%),
+      radial-gradient(1000px 700px at 50% 100%,#0e1b38 0%,transparent 65%),
+      #050510;
+  }
+
+  /* ── Genesis-style living cosmos (blur-free gradients) ── */
+  .nebula{position:fixed;z-index:-2;pointer-events:none;will-change:transform;transform:translateZ(0)}
+  .neb1{width:95vw;height:95vh;top:-22%;left:-28%;
+    background:radial-gradient(ellipse at 35% 45%,rgba(109,91,208,.20) 0%,rgba(109,91,208,.07) 42%,transparent 68%),
+               radial-gradient(ellipse at 70% 60%,rgba(120,40,100,.15) 0%,transparent 60%);
+    animation:nebDrift 48s ease-in-out infinite alternate}
+  .neb2{width:85vw;height:85vh;bottom:-24%;right:-22%;
+    background:radial-gradient(ellipse at 60% 50%,rgba(20,90,105,.17) 0%,transparent 62%),
+               radial-gradient(ellipse at 30% 30%,rgba(233,196,106,.10) 0%,transparent 55%);
+    animation:nebDrift 62s ease-in-out infinite alternate-reverse}
+  @keyframes nebDrift{from{transform:translate(0,0) scale(1)}to{transform:translate(5vw,-4vh) scale(1.12)}}
+  .aurora{position:fixed;top:-24vh;left:50%;width:170vw;height:70vh;z-index:-2;opacity:.55;pointer-events:none;
+    background:linear-gradient(100deg,transparent 20%,rgba(74,222,128,.09) 36%,rgba(196,181,253,.13) 50%,rgba(233,196,106,.11) 64%,transparent 80%);
+    -webkit-mask-image:radial-gradient(ellipse at 50% 0%,#000 25%,transparent 72%);
+    mask-image:radial-gradient(ellipse at 50% 0%,#000 25%,transparent 72%);
+    animation:auroraSway 22s ease-in-out infinite alternate;will-change:transform}
+  @keyframes auroraSway{from{transform:translateX(-54%) skewX(-5deg)}to{transform:translateX(-46%) skewX(5deg)}}
+  .shoot{position:fixed;width:130px;height:2px;z-index:-1;pointer-events:none;border-radius:99px;
+    background:linear-gradient(90deg,rgba(255,255,255,0),#fff 55%,rgba(233,196,106,.9));
+    filter:drop-shadow(0 0 6px rgba(233,196,106,.8));
+    animation:shootAcross 1.4s ease-in forwards}
+  @keyframes shootAcross{from{transform:translate(0,0) rotate(24deg);opacity:0}12%{opacity:1}to{transform:translate(-58vw,52vh) rotate(24deg);opacity:0}}
+
+  /* ── Themed animated scrollbar + progress ──── */
+  html{scrollbar-width:thin;scrollbar-color:#b8860b #050510}
+  ::-webkit-scrollbar{width:11px}
+  ::-webkit-scrollbar-track{background:#050510;border-left:1px solid rgba(255,255,255,.05)}
+  ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#f6e27a,#b8860b 60%,#7a5a08);border-radius:99px;
+    border:2px solid #050510;box-shadow:inset 0 0 6px rgba(255,243,196,.5)}
+  ::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#fff3c4,#e9c46a)}
+  #scrollProgress{position:fixed;top:0;left:0;height:3px;width:0%;z-index:99;pointer-events:none;
+    background:linear-gradient(90deg,#7a5a08,#e9c46a,#f6e27a);box-shadow:0 0 12px rgba(233,196,106,.8),0 0 4px rgba(233,196,106,1)}
+  #scrollPct{position:fixed;right:20px;bottom:22px;z-index:96;font-size:11px;letter-spacing:2px;color:var(--muted);
+    pointer-events:none;display:flex;align-items:center;gap:8px}
+  #scrollPct b{color:var(--gold);font-size:14px;min-width:44px;text-align:right}
+  #scrollPct::before{content:"";width:44px;height:1px;background:linear-gradient(90deg,transparent,rgba(233,196,106,.7))}
+  @media (max-width:760px){#scrollPct{display:none}}
+
+  /* ── Genesis divine light (GPU-cheap, no blur filters) ── */
+  .godrays{position:fixed;top:-80vmax;left:50%;width:160vmax;height:160vmax;margin-left:-80vmax;z-index:-2;opacity:.09;pointer-events:none;
+    background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(233,196,106,0) 0deg,rgba(233,196,106,.5) 3deg,rgba(233,196,106,0) 7deg,rgba(233,196,106,0) 15deg);
+    -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 0%,transparent 60%);
+    mask-image:radial-gradient(circle at 50% 50%,#000 0%,transparent 60%);
+    animation:raysSpin 180s linear infinite;will-change:transform}
+  @keyframes raysSpin{to{transform:rotate(360deg)}}
+  .dawn{position:fixed;left:50%;bottom:-32vh;width:170vw;height:70vh;transform:translateX(-50%);z-index:-2;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 100%,rgba(233,196,106,.20) 0%,rgba(184,134,11,.10) 38%,transparent 70%);
+    animation:dawnPulse 14s ease-in-out infinite}
+  @keyframes dawnPulse{0%,100%{opacity:.65}50%{opacity:1}}
+
+  #stars{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .starlayer{position:absolute;top:0;left:0;width:1.6px;height:1.6px;border-radius:50%;background:transparent}
+  .sl1{animation:twinkleA 4.5s ease-in-out infinite alternate}
+  .sl2{animation:twinkleA 7s ease-in-out infinite alternate-reverse}
+  @keyframes twinkleA{from{opacity:.3}to{opacity:1}}
+
+  .mandala{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(620px,94vw);height:min(620px,94vw);
+    z-index:1;opacity:.5;pointer-events:none;will-change:transform}
+  .spin-slow{transform-origin:50% 50%;animation:spin 90s linear infinite}
+  .spin-rev{transform-origin:50% 50%;animation:spin 60s linear infinite reverse}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .zg{font-size:19px;fill:rgba(233,196,106,.7)}
+
+  .page{max-width:900px;margin:0 auto;padding:0 20px 80px}
+
+  /* ── Cinematic full-screen hero ────────────── */
+  .hero{position:relative;width:100vw;margin-left:calc(50% - 50vw);min-height:100svh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+  .scene{position:absolute;inset:0;pointer-events:none}
+  .layer{position:absolute;left:50%;bottom:0;width:max(1600px,110vw);transform:translateX(-50%);will-change:transform}
+  .hero-inner{position:relative;z-index:2;padding:0 20px;display:flex;flex-direction:column;align-items:center}
+  .eyebrow{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);opacity:0;animation:eyeIn 1s .2s cubic-bezier(.22,1,.36,1) forwards}
+  @keyframes eyeIn{from{opacity:0;transform:translateY(16px)}to{opacity:.95;transform:none}}
+  .om{font-size:50px;background:linear-gradient(135deg,#f6e27a,#e9c46a 40%,#b8860b);-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:omFloat 4s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(233,196,106,.45));margin:12px 0 0}
+  @keyframes omFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  h1.display{margin:8px 0 14px;font-size:clamp(44px,9vw,96px);line-height:1.03;letter-spacing:-1px;font-weight:800}
+  h1.display .line{display:block;overflow:hidden;padding-bottom:.06em}
+  h1.display .line i{display:inline-block;font-style:normal;transform:translateY(112%);animation:lineUp 1.1s .25s cubic-bezier(.22,1,.36,1) forwards;
+    background:linear-gradient(120deg,#fff 20%,#cfc6f5 55%,#e9c46a 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h1.display .line:nth-child(2) i{animation-delay:.42s}
+  @keyframes lineUp{to{transform:translateY(0)}}
+  .hero .sub{color:var(--muted);font-size:15px;max-width:560px;opacity:0;animation:eyeIn 1s .75s cubic-bezier(.22,1,.36,1) forwards}
+  .hero-cta{margin-top:26px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;opacity:0;animation:eyeIn 1s .95s cubic-bezier(.22,1,.36,1) forwards}
+  .scroll-cue{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2;color:var(--muted);font-size:10px;letter-spacing:3px;
+    text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px;animation:cueFade 2.4s ease-in-out infinite}
+  .scroll-cue::after{content:"";width:1px;height:38px;background:linear-gradient(var(--gold),transparent)}
+  @keyframes cueFade{0%,100%{opacity:.4}50%{opacity:1}}
+
+  /* ── Film grain + vignette ─────────────────── */
+  #grain{position:fixed;inset:-100px;z-index:98;pointer-events:none;opacity:.035;will-change:transform;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grain 8s steps(10) infinite}
+  @keyframes grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-40px,30px)}40%{transform:translate(30px,-40px)}60%{transform:translate(-30px,-20px)}80%{transform:translate(40px,25px)}}
+  #vignette{position:fixed;inset:0;z-index:97;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(5,4,14,.55) 100%)}
+
+  /* ── Fixed section counter ─────────────────── */
+  #secCounter{position:fixed;left:18px;bottom:22px;z-index:96;font-size:11px;letter-spacing:2px;color:var(--muted);
+    display:flex;align-items:center;gap:8px;pointer-events:none}
+  #secCounter b{color:var(--gold);font-size:13px}
+  #secCounter::after{content:"";width:44px;height:1px;background:linear-gradient(90deg,rgba(233,196,106,.7),transparent)}
+  @media (max-width:760px){#secCounter{display:none}}
+
+  /* ── Section headings ──────────────────────── */
+  .sect-eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);text-align:center;margin:44px 0 6px}
+  .sect-display{font-size:clamp(26px,4.6vw,40px);font-weight:800;text-align:center;margin:0 0 4px;color:var(--ink)}
+
+  /* ── Pinned scroll-scrub section ───────────── */
+  .scrub{position:relative;height:420vh;width:100vw;margin-left:calc(50% - 50vw)}
+  .scrub-sticky{position:sticky;top:0;height:100svh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .scrub-wheel{position:absolute;width:min(88vh,88vw);opacity:.45;will-change:transform}
+  .scrub-copy{position:relative;z-index:2;text-align:center;padding:0 20px}
+  .scrub-counter{font-size:12px;letter-spacing:4px;color:var(--muted);margin-bottom:14px;text-transform:uppercase}
+  .scrub-counter b{color:var(--gold);font-size:16px}
+  .scrub-title{font-size:clamp(40px,8vw,84px);font-weight:800;margin:0;line-height:1.05;
+    background:linear-gradient(120deg,#fff 20%,#e9c46a 90%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    transition:opacity .25s,transform .25s}
+  .scrub-title.swap{opacity:0;transform:translateY(18px)}
+  .scrub-desc{color:var(--muted);font-size:14.5px;max-width:440px;margin:14px auto 0;min-height:44px;transition:opacity .25s}
+  .scrub-desc.swap{opacity:0}
+  .scrub-max{font-size:12px;letter-spacing:2px;color:var(--gold);margin-top:10px;text-transform:uppercase}
+
+  /* ── Big statement (word reveal) ───────────── */
+  .statement{padding:16vh 0;text-align:center}
+  .statement h2{font-size:clamp(30px,6vw,58px);font-weight:800;line-height:1.18;margin:0 auto;max-width:760px}
+  .statement .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em}
+  .statement .w i{display:inline-block;font-style:normal;transform:translateY(112%);transition:transform .9s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i)*60ms);
+    background:linear-gradient(120deg,#fff 30%,#e9c46a 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .statement.in .w i{transform:translateY(0)}
+  .statement p{color:var(--muted);font-size:14px;margin-top:16px}
+
+  .ornament{display:flex;align-items:center;justify-content:center;gap:12px;margin:14px 0 0;color:var(--gold);opacity:.75}
+  .ornament::before,.ornament::after{content:"";height:1px;width:min(160px,26vw);
+    background:linear-gradient(90deg,transparent,rgba(233,196,106,.7));}
+  .ornament::after{background:linear-gradient(90deg,rgba(233,196,106,.7),transparent)}
+  .ornament span{font-size:14px;letter-spacing:6px}
+
+  .reveal{opacity:0;transform:translateY(54px) scale(.98);filter:blur(8px);
+    transition:opacity .9s cubic-bezier(.22,1,.36,1),transform .9s cubic-bezier(.22,1,.36,1),filter .9s cubic-bezier(.22,1,.36,1)}
+  .reveal.in{opacity:1;transform:none;filter:none}
+  .row.reveal{transform:translateX(-28px);transition-duration:.6s}
+  .row.reveal.in{transform:none}
+
+  /* ── Birth details form ────────────────────── */
+  .form-card{width:100%;margin:26px 0 10px;background:var(--glass);border:1px solid var(--stroke);border-radius:22px;
+    backdrop-filter:blur(9px) saturate(1.3);-webkit-backdrop-filter:blur(9px) saturate(1.3);
+    box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.09);padding:22px;text-align:left}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:640px){.form-grid{grid-template-columns:1fr}}
+  .person{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
+  .person h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);display:flex;align-items:center;gap:8px}
+  .person h3 .tag{font-size:10px;letter-spacing:1px;color:var(--muted);background:rgba(255,255,255,.06);padding:3px 8px;border-radius:99px;border:1px solid var(--stroke)}
+  .field{margin-bottom:11px}
+  .field label{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .field input,.field select{width:100%;font:inherit;font-size:14px;color:var(--ink);
+    background:rgba(255,255,255,.06);border:1px solid var(--stroke);border-radius:11px;padding:10px 12px;outline:none;
+    transition:border-color .3s,box-shadow .3s}
+  .field input:focus,.field select:focus{border-color:var(--stroke-hi);box-shadow:0 0 0 4px rgba(233,196,106,.1)}
+  .field select option{background:#1c1838;color:var(--ink)}
+  .field input::-webkit-calendar-picker-indicator{filter:invert(.8) sepia(.5) saturate(3) hue-rotate(-10deg)}
+  .calc-bar{display:flex;justify-content:center;gap:12px;margin-top:18px;flex-wrap:wrap;align-items:center}
+  .calc-note{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
+  .err{color:var(--bad);font-size:12.5px;font-weight:700;text-align:center;margin-top:10px;display:none}
+
+  /* ── HUD ───────────────────────────────────── */
+  .hud{position:sticky;top:12px;z-index:60;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    background:rgba(20,18,42,.55);backdrop-filter:blur(11px) saturate(1.4);-webkit-backdrop-filter:blur(11px) saturate(1.4);
+    border:1px solid var(--stroke);border-radius:20px;padding:12px 18px;margin:18px 0 26px;
+    box-shadow:0 18px 50px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);
+    transition:box-shadow .4s,border-color .4s}
+  .hud.glow{border-color:var(--stroke-hi);box-shadow:0 18px 60px rgba(233,196,106,.14),inset 0 1px 0 rgba(255,255,255,.08)}
+  .gauge-wrap{position:relative;width:78px;height:78px;flex:0 0 auto}
+  .gauge-wrap svg{transform:rotate(-90deg)}
+  .gauge-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:19px}
+  .gauge-num small{font-weight:600;font-size:9px;color:var(--muted)}
+  .hud-mid{flex:1;min-width:220px}
+  .hud-band{font-weight:700;font-size:15px;transition:color .4s}
+  .hud-msg{font-size:11.5px;color:var(--muted)}
+  .minibar{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:7px}
+  .minibar i{display:block;height:100%;width:0%;border-radius:99px;
+    background:linear-gradient(90deg,#f87171,#fbbf24,#4ade80);background-size:200% 100%;
+    transition:width .5s cubic-bezier(.22,1,.36,1);animation:shimmer 3s linear infinite}
+  @keyframes shimmer{to{background-position:-200% 0}}
+  .gate-pill{font-size:11px;font-weight:700;padding:7px 13px;border-radius:99px;border:1px solid var(--stroke);white-space:nowrap;transition:all .35s;background:var(--glass)}
+  .gate-pill.pass{background:rgba(74,222,128,.12);color:var(--good);border-color:rgba(74,222,128,.4)}
+  .gate-pill.fail{background:rgba(248,113,113,.12);color:var(--bad);border-color:rgba(248,113,113,.4);animation:pulse 1.6s infinite}
+  .gate-pill.pending{color:var(--muted)}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+  .use{background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+    border-radius:16px;padding:13px 18px;font-size:13px;margin:0 0 8px;color:var(--muted)}
+  .use b{color:var(--ink)}
+
+  /* ── Astro summary ─────────────────────────── */
+  #astro-summary{display:none;background:var(--glass);border:1px solid var(--stroke);border-radius:22px;padding:20px 22px;margin:26px 0;
+    backdrop-filter:blur(9px) saturate(1.3);-webkit-backdrop-filter:blur(9px) saturate(1.3);
+    box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.09)}
+  #astro-summary h2{font-size:14px;margin:0 0 14px;color:var(--purple);border-left:3px solid var(--gold);padding-left:11px;
+    text-transform:uppercase;letter-spacing:1.2px}
+  .sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+  @media (max-width:640px){.sum-grid{grid-template-columns:1fr}}
+  .sum-person{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px}
+  .sum-person h4{margin:0 0 8px;font-size:15px;color:var(--gold)}
+  .sum-person div{font-size:12.5px;color:var(--muted);padding:2.5px 0}
+  .sum-person div b{color:var(--ink);font-weight:600}
+  .mangal-yes{color:var(--bad)!important;font-weight:700}
+  .mangal-no{color:var(--good)!important;font-weight:700}
+  .koota-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12.5px}
+  .koota-row .kname{width:150px;flex:0 0 auto;color:var(--muted)}
+  .koota-row .kbar{flex:1;height:7px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+  .koota-row .kbar i{display:block;height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#b8860b,#e9c46a);
+    box-shadow:0 0 10px rgba(233,196,106,.5);transition:width .9s cubic-bezier(.22,1,.36,1)}
+  .koota-row .kbar i.kzero{background:rgba(248,113,113,.7);box-shadow:0 0 10px rgba(248,113,113,.4)}
+  .koota-row .kval{width:56px;flex:0 0 auto;text-align:right;font-weight:700}
+  .guna-total{margin-top:12px;text-align:center;font-size:15px;font-weight:800;color:var(--gold);
+    background:rgba(233,196,106,.08);border:1px solid rgba(233,196,106,.3);border-radius:12px;padding:10px}
+
+  /* ── Section banners & cards ───────────────── */
+  section.card{
+    background:var(--glass);border:1px solid var(--stroke);border-radius:22px;padding:20px 22px 12px;margin:26px 0;
+    backdrop-filter:blur(9px) saturate(1.3);-webkit-backdrop-filter:blur(9px) saturate(1.3);
+    box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.09);
+    transition:transform .5s cubic-bezier(.22,1,.36,1),border-color .4s,box-shadow .4s;
+    position:relative;overflow:hidden}
+  section.card::before{content:"";position:absolute;inset:0;border-radius:22px;pointer-events:none;
+    background:radial-gradient(600px 200px at var(--mx,50%) var(--my,0%),rgba(233,196,106,.08),transparent 60%);
+    opacity:0;transition:opacity .4s}
+  section.card:hover::before{opacity:1}
+  section.card:hover{border-color:rgba(255,255,255,.22);box-shadow:0 28px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.12)}
+  .banner{margin:-20px -22px 16px;border-radius:22px 22px 0 0;overflow:hidden;position:relative;height:96px;
+    clip-path:inset(0 100% 0 0);transition:clip-path 1.2s cubic-bezier(.22,1,.36,1) .15s}
+  .card.in .banner{clip-path:inset(0 0 0 0)}
+  .banner svg{display:block;width:100%;height:100%;will-change:transform;transform:scale(1.18)}
+  .banner .b-title{position:absolute;left:18px;bottom:10px;font-size:12px;font-weight:800;letter-spacing:2.5px;
+    text-transform:uppercase;color:rgba(255,255,255,.92);text-shadow:0 2px 10px rgba(0,0,0,.5)}
+  .banner::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(11,10,26,.45));pointer-events:none}
+  .sect-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .sect-head h2{font-size:14px;margin:0;color:var(--purple);border-left:3px solid var(--gold);padding-left:11px;text-transform:uppercase;letter-spacing:1.2px}
+  .sect-head h2 span{text-transform:none;letter-spacing:0;color:var(--muted);font-weight:500}
+  .sect-score{font-weight:800;font-size:14px;color:var(--gold);background:rgba(233,196,106,.1);border:1px solid rgba(233,196,106,.25);
+    padding:5px 14px;border-radius:99px;min-width:76px;text-align:center;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+  .sect-score.bump{transform:scale(1.22)}
+  .sectbar{height:5px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-bottom:12px}
+  .sectbar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#b8860b,#e9c46a,#f6e27a);transition:width .55s cubic-bezier(.22,1,.36,1);
+    box-shadow:0 0 12px rgba(233,196,106,.6)}
+
+  .row{display:flex;align-items:center;gap:14px;padding:11px 4px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .row:last-child{border-bottom:none}
+  .row-label{flex:1;font-size:13.5px}
+  .row-label i{color:var(--muted);font-style:normal;font-size:11.5px}
+  .row-ctrl{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+  .stars{font-size:10px;letter-spacing:1.5px;color:var(--gold);min-width:56px;text-align:right;text-shadow:0 0 8px rgba(233,196,106,.5)}
+  .stars .off{color:rgba(255,255,255,.15);text-shadow:none}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;width:130px;height:5px;border-radius:99px;cursor:pointer;outline:none;
+    background:linear-gradient(90deg,var(--gold) var(--fill,0%),rgba(255,255,255,.12) var(--fill,0%))}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#fdf0c2,#e9c46a 55%,#b8860b);border:1px solid rgba(255,255,255,.5);
+    box-shadow:0 0 0 4px rgba(233,196,106,.15),0 2px 10px rgba(0,0,0,.5);transition:transform .15s,box-shadow .25s}
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25);box-shadow:0 0 0 7px rgba(233,196,106,.2),0 0 18px rgba(233,196,106,.6)}
+  input[type=range]:active::-webkit-slider-thumb{transform:scale(1.35)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#e9c46a;border:1px solid rgba(255,255,255,.5);
+    box-shadow:0 0 0 4px rgba(233,196,106,.15)}
+  input[type=range]::-moz-range-track{height:5px;border-radius:99px;background:rgba(255,255,255,.12)}
+  input[type=range]::-moz-range-progress{height:5px;border-radius:99px;background:var(--gold)}
+
+  .val{font-weight:800;font-size:13px;min-width:52px;text-align:center;border-radius:10px;padding:5px 7px;
+    background:rgba(255,255,255,.07);border:1px solid var(--stroke);transition:all .3s}
+  .val.full{background:rgba(74,222,128,.12);color:var(--good);border-color:rgba(74,222,128,.35);box-shadow:0 0 14px rgba(74,222,128,.2)}
+  .val.zero{background:rgba(248,113,113,.1);color:var(--bad);border-color:rgba(248,113,113,.3)}
+  .val.tweaked{border-style:dashed;border-color:rgba(196,181,253,.5)}
+
+  #verdict{border-radius:22px;padding:26px 22px;margin:26px 0;text-align:center;border:1px solid var(--stroke);
+    background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:all .5s;
+    box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.09)}
+  #verdict h3{margin:0 0 8px;font-size:24px;transition:color .4s}
+  #verdict p{margin:4px auto;font-size:13.5px;color:var(--muted);max-width:520px}
+  #verdict.v1{border-color:rgba(74,222,128,.45)} #verdict.v1 h3{color:var(--good)}
+  #verdict.v2{border-color:rgba(196,181,253,.45)} #verdict.v2 h3{color:var(--purple)}
+  #verdict.v3{border-color:rgba(251,191,36,.45)} #verdict.v3 h3{color:var(--warn)}
+  #verdict.v4{border-color:rgba(248,113,113,.45)} #verdict.v4 h3{color:var(--bad)}
+  .gate-note{display:inline-block;margin-top:12px;font-size:12.5px;font-weight:700;padding:8px 18px;border-radius:99px;backdrop-filter:blur(8px)}
+  .gate-note.fail{background:rgba(248,113,113,.12);color:var(--bad);border:1px solid rgba(248,113,113,.4)}
+  .gate-note.pass{background:rgba(74,222,128,.12);color:var(--good);border:1px solid rgba(74,222,128,.4)}
+
+  .bands{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;font-size:11.5px;justify-content:center}
+  .bands span{padding:6px 11px;border-radius:99px;border:1px solid var(--stroke);opacity:.4;transition:all .4s;background:rgba(255,255,255,.04)}
+  .bands span.active{opacity:1;transform:scale(1.08);font-weight:700}
+  .b1.active{background:rgba(74,222,128,.14);color:var(--good);border-color:rgba(74,222,128,.5)}
+  .b2.active{background:rgba(196,181,253,.14);color:var(--purple);border-color:rgba(196,181,253,.5)}
+  .b3.active{background:rgba(251,191,36,.14);color:var(--warn);border-color:rgba(251,191,36,.5)}
+  .b4.active{background:rgba(248,113,113,.14);color:var(--bad);border-color:rgba(248,113,113,.5)}
+
+  .gate{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.28);border-radius:16px;padding:14px 18px;margin:22px 0;font-size:13px;
+    backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);color:var(--muted)}
+  .gate b{color:var(--bad)} .gate i{color:var(--ink)}
+
+  .toolbar{display:flex;gap:12px;justify-content:center;margin:26px 0;flex-wrap:wrap}
+  button.btn{font:inherit;font-size:13px;font-weight:700;padding:11px 24px;border-radius:99px;cursor:pointer;
+    border:1px solid var(--stroke);background:var(--glass);color:var(--ink);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+    transition:all .25s cubic-bezier(.22,1,.36,1)}
+  button.btn:hover:not(:disabled){border-color:var(--stroke-hi);box-shadow:0 6px 24px rgba(233,196,106,.25);transform:translateY(-2px)}
+  button.btn:active:not(:disabled){transform:translateY(0) scale(.97)}
+  button.btn:disabled{opacity:.4;cursor:not-allowed}
+  button.btn.primary{background:linear-gradient(135deg,rgba(233,196,106,.25),rgba(184,134,11,.35));border-color:rgba(233,196,106,.5);color:#fdf0c2}
+  button.btn.big{font-size:15px;padding:13px 34px}
+
+  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:26px;border-top:1px solid rgba(255,255,255,.08);padding-top:14px}
+
+  .confetti{position:fixed;top:-14px;font-size:16px;z-index:999;animation:fall linear forwards;pointer-events:none}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.3}}
+
+  /* render-skip offscreen sections (faster first paint & scroll) */
+  section.card,#astro-summary,#verdict,.gate,.statement,footer{content-visibility:auto;contain-intrinsic-size:auto 420px}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01s!important;transition-duration:.15s!important}
+    .reveal{opacity:1;transform:none}
+  }
+  @media print{
+    body{background:#fff;color:#22203a}
+    body::before,.orb,.hud,.toolbar,#stars,.mandala,.ornament,.banner,.form-card,.err,
+    #grain,#vignette,#secCounter,.scrub,.statement,.scene,.scroll-cue,.hero-cta,
+    .nebula,.aurora,.shoot,#scrollProgress,#scrollPct{display:none!important}
+    .hero{min-height:auto;width:auto;margin-left:0;padding:20px 0}
+    h1.display .line i,.hero .sub,.eyebrow{animation:none;opacity:1;transform:none;color:#3a2f66;-webkit-text-fill-color:#3a2f66}
+    section.card,#verdict,.use,.gate,#astro-summary{background:#fff;border:1px solid #ddd;box-shadow:none;backdrop-filter:none;break-inside:avoid;color:#22203a}
+    #astro-summary{display:block}
+    .hero h1,#verdict h3{color:#3a2f66;-webkit-text-fill-color:#3a2f66}
+    .reveal{opacity:1!important;transform:none!important}
+    input[type=range]{display:none}
+  }
+  @media (max-width:560px){
+    .row{flex-wrap:wrap}.row-ctrl{width:100%;justify-content:flex-end}
+    input[type=range]{flex:1;width:auto}
+  }
+</style>
+</head>
+<body>
+<div class="godrays"></div>
+<div class="dawn"></div>
+<div class="nebula neb1"></div>
+<div class="nebula neb2"></div>
+<div class="aurora"></div>
+<div id="stars"></div>
+<div id="grain"></div>
+<div id="vignette"></div>
+<div id="scrollProgress"></div>
+<div id="scrollPct"><b id="scrollPctNum">0%</b></div>
+<div id="secCounter"><b id="secCounterNum">01</b>&nbsp;/&nbsp;<span id="secCounterTotal">08</span></div>
+
+<div class="page">
+
+  <section class="hero" id="hero">
+    <div class="scene">
+      <svg class="layer l-far" data-p="0.10" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="mt1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#251d4f"/><stop offset="1" stop-color="#141031"/></linearGradient></defs>
+        <circle cx="1250" cy="110" r="52" fill="#f6e27a" opacity=".14"/>
+        <circle cx="1250" cy="110" r="32" fill="#f6e27a" opacity=".22"/>
+        <path d="M0 420 L0 300 L180 200 L340 290 L520 170 L700 280 L900 190 L1100 300 L1300 210 L1450 280 L1600 240 L1600 420 Z" fill="url(#mt1)"/>
+      </svg>
+      <svg class="mandala" id="heroMandala" viewBox="0 0 560 560" xmlns="http://www.w3.org/2000/svg">
+      <defs><radialGradient id="mgl" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(233,196,106,.25)"/><stop offset="100%" stop-color="transparent"/>
+      </radialGradient></defs>
+      <circle cx="280" cy="280" r="240" fill="url(#mgl)"/>
+      <g class="spin-slow">
+        <circle cx="280" cy="280" r="238" fill="none" stroke="rgba(233,196,106,.35)" stroke-width="1" stroke-dasharray="3 9"/>
+        <circle cx="280" cy="280" r="205" fill="none" stroke="rgba(196,181,253,.25)" stroke-width="1"/>
+        <g class="zg" text-anchor="middle" dominant-baseline="middle">
+          <text x="280" y="58">♈</text><text x="391" y="88">♉</text><text x="472" y="169">♊</text>
+          <text x="502" y="280">♋</text><text x="472" y="391">♌</text><text x="391" y="472">♍</text>
+          <text x="280" y="502">♎</text><text x="169" y="472">♏</text><text x="88" y="391">♐</text>
+          <text x="58" y="280">♑</text><text x="88" y="169">♒</text><text x="169" y="88">♓</text>
+        </g>
+      </g>
+      <g class="spin-rev">
+        <circle cx="280" cy="280" r="160" fill="none" stroke="rgba(233,196,106,.28)" stroke-width="1" stroke-dasharray="1 7"/>
+        <circle cx="280" cy="120" r="4" fill="rgba(233,196,106,.9)"/>
+        <circle cx="440" cy="280" r="3" fill="rgba(196,181,253,.9)"/>
+        <circle cx="280" cy="440" r="3.5" fill="rgba(248,113,113,.8)"/>
+        <circle cx="120" cy="280" r="3" fill="rgba(74,222,128,.8)"/>
+      </g>
+    </svg>
+      <svg class="layer l-mid" data-p="0.22" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="mt2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#191338"/><stop offset="1" stop-color="#0d0a22"/></linearGradient></defs>
+        <path d="M0 420 L0 330 L240 250 L420 330 L600 260 L830 340 L1050 250 L1280 340 L1600 280 L1600 420 Z" fill="url(#mt2)"/>
+        <g fill="#0d0a22">
+          <rect x="740" y="300" width="120" height="120"/>
+          <path d="M745 300 L800 210 L855 300 Z"/>
+          <rect x="795" y="196" width="10" height="18"/>
+          <rect x="700" y="330" width="44" height="90"/>
+          <path d="M700 330 L722 285 L744 330 Z"/>
+          <rect x="856" y="330" width="44" height="90"/>
+          <path d="M856 330 L878 285 L900 330 Z"/>
+        </g>
+        <circle cx="800" cy="190" r="5" fill="#e9c46a" opacity=".9"/>
+      </svg>
+      <svg class="layer l-fg" data-p="0.38" viewBox="0 0 1600 320" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 320 L0 240 Q200 190 420 235 Q700 285 900 240 Q1200 190 1400 245 L1600 225 L1600 320 Z" fill="#080618"/>
+        <g fill="#080618">
+          <path d="M120 246 L138 160 L156 246 Z"/><path d="M150 250 L164 190 L178 250 Z"/>
+          <path d="M1430 250 L1448 158 L1466 250 Z"/><path d="M1466 254 L1478 200 L1490 254 Z"/>
+        </g>
+      </svg>
+    </div>
+    <div class="hero-inner">
+      <div class="eyebrow">Astro-Gyani · Vedic Match Engine</div>
+      <div class="om">ॐ</div>
+      <h1 class="display"><span class="line"><i>Written in</i></span><span class="line"><i>the stars.</i></span></h1>
+      <p class="sub">Two birth charts. One verdict. Aṣṭakoota Guṇa Milan, Nāḍī, Gaṇa, Bhakūṭa, Maṅgal Doṣa &amp; planetary dignities — computed live from real planetary positions.</p>
+      <div class="hero-cta">
+        <button class="btn primary big" onclick="document.getElementById('form-sect').scrollIntoView({behavior:'smooth'})">Begin the reading ↓</button>
+      </div>
+    </div>
+    <div class="scroll-cue">Scroll</div>
+  </section>
+
+  <section id="form-sect">
+    <div class="sect-eyebrow">Step 01 — Birth Details</div>
+    <h2 class="sect-display">Two souls. Two charts.</h2>
+
+    <div class="form-card reveal in">
+      <div class="form-grid">
+        <div class="person">
+          <h3>Person 1 <span class="tag">groom / self</span></h3>
+          <div class="field"><label>Name</label><input id="p1name" type="text" placeholder="e.g. Mayank" value="Mayank" maxlength="40"></div>
+          <div class="field"><label>Date of birth</label><input id="p1date" type="date"></div>
+          <div class="field"><label>Time of birth (local)</label><input id="p1time" type="time" value="12:00"></div>
+          <div class="field"><label>Birth timezone</label><select id="p1tz"></select></div>
+        </div>
+        <div class="person">
+          <h3>Person 2 <span class="tag">bride / partner</span></h3>
+          <div class="field"><label>Name</label><input id="p2name" type="text" placeholder="Her name" maxlength="40"></div>
+          <div class="field"><label>Date of birth</label><input id="p2date" type="date"></div>
+          <div class="field"><label>Time of birth (local)</label><input id="p2time" type="time" value="12:00"></div>
+          <div class="field"><label>Birth timezone</label><select id="p2tz"></select></div>
+        </div>
+      </div>
+      <div class="calc-bar">
+        <button class="btn primary big" onclick="calculate()">✨ Calculate Match</button>
+      </div>
+      <div class="err" id="formErr"></div>
+      <div class="calc-note">If exact birth time is unknown, keep 12:00 — the Moon sign is correct on most days, but may shift on Moon-transition days.</div>
+    </div>
+  </section>
+
+  <section class="scrub" id="scrub">
+    <div class="scrub-sticky">
+      <svg class="scrub-wheel" id="scrubWheel" viewBox="0 0 560 560" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="280" cy="280" r="238" fill="none" stroke="rgba(233,196,106,.3)" stroke-width="1" stroke-dasharray="3 9"/>
+        <circle cx="280" cy="280" r="200" fill="none" stroke="rgba(196,181,253,.22)" stroke-width="1"/>
+        <circle cx="280" cy="280" r="150" fill="none" stroke="rgba(233,196,106,.22)" stroke-width="1" stroke-dasharray="1 7"/>
+        <g fill="rgba(233,196,106,.55)">
+          <circle cx="280" cy="42" r="5"/><circle cx="448" cy="112" r="3"/><circle cx="518" cy="280" r="3"/>
+          <circle cx="448" cy="448" r="3"/><circle cx="280" cy="518" r="3"/><circle cx="112" cy="448" r="3"/>
+          <circle cx="42" cy="280" r="3"/><circle cx="112" cy="112" r="3"/>
+        </g>
+        <circle cx="280" cy="42" r="8" fill="none" stroke="rgba(233,196,106,.8)" stroke-width="1.5"/>
+      </svg>
+      <div class="scrub-copy">
+        <div class="scrub-counter"><b id="scrubIdx">01</b> / 08 · The Aṣṭakoota</div>
+        <h2 class="scrub-title" id="scrubTitle">Varṇa</h2>
+        <p class="scrub-desc" id="scrubDesc">Spiritual grain &amp; ego balance — does his nature respect hers?</p>
+        <div class="scrub-max" id="scrubMax">worth 1 point</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hud" id="hud">
+    <div class="gauge-wrap">
+      <svg width="78" height="78" viewBox="0 0 78 78">
+        <circle cx="39" cy="39" r="33" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="8"/>
+        <circle id="gaugeArc" cx="39" cy="39" r="33" fill="none" stroke="#e9c46a" stroke-width="8"
+          stroke-linecap="round" stroke-dasharray="207.3" stroke-dashoffset="207.3"
+          style="transition:stroke-dashoffset .6s cubic-bezier(.22,1,.36,1),stroke .4s;filter:drop-shadow(0 0 6px rgba(233,196,106,.5))"/>
+      </svg>
+      <div class="gauge-num"><span id="totalNum">0</span><small>/ 100</small></div>
+    </div>
+    <div class="hud-mid">
+      <div class="hud-band" id="hudBand">Enter birth details above ✨</div>
+      <div class="hud-msg" id="hudMsg">The scorecard fills itself from the calculations — then tweak freely.</div>
+      <div class="minibar"><i id="miniFill"></i></div>
+    </div>
+    <div class="gate-pill pending" id="gatePill">🔒 Constancy Gate: —</div>
+  </div>
+
+  <div id="astro-summary" class="reveal in">
+    <h2>Computed Chart Summary</h2>
+    <div class="sum-grid" id="sumGrid"></div>
+    <div id="kootaList"></div>
+    <div class="guna-total" id="gunaTotal"></div>
+  </div>
+
+  <div class="use reveal">
+    <b>How it works:</b> Section A comes directly from the Aṣṭakoota &amp; doṣa calculations. Sections B–D are <b>astrological suggestions</b> derived from her Moon sign, Gaṇa, and planetary dignities — verify them against the real person. Tweak any slider; <b>↩ Restore</b> brings back the calculated values. Everything auto-saves.
+  </div>
+
+  <div id="sections"></div>
+
+  <section class="statement" id="statement">
+    <h2 id="stmtH">Some wait for destiny. Others calculate it.</h2>
+    <p>— then verify it with the heart.</p>
+  </section>
+
+  <div class="ornament reveal"><span>✦ ॐ ✦</span></div>
+
+  <div id="verdict" class="reveal">
+    <h3 id="vTitle">Awaiting calculation…</h3>
+    <p id="vText">Enter both birth details and press Calculate Match.</p>
+    <span class="gate-note" id="vGate" style="display:none"></span>
+    <div class="bands">
+      <span class="b1" data-band="1"><b>80–100</b> Excellent — proceed with confidence</span>
+      <span class="b2" data-band="2"><b>65–79</b> Strong — promising, mind the gaps</span>
+      <span class="b3" data-band="3"><b>50–64</b> Mixed — only if Section B is high</span>
+      <span class="b4" data-band="4"><b>&lt;50</b> Poor fit — walk away</span>
+    </div>
+  </div>
+
+  <div class="gate reveal">
+    <b>⚠ The Constancy Gate (most important rule):</b> If <b>Section B scores below 15/30</b>, treat the match as a caution <i>regardless of the total</i>. Loyalty and steadiness are the gate no beauty or compatibility can buy past. A high total with a weak Section B = wait and watch, don't commit.
+  </div>
+
+  <div class="toolbar reveal">
+    <button class="btn primary" onclick="window.print()">🖨 Print / Save PDF</button>
+    <button class="btn" id="restoreBtn" onclick="restoreCalc()" disabled>↩ Restore calculated scores</button>
+    <button class="btn" onclick="resetAll()">↺ Clear all</button>
+  </div>
+
+  <footer class="reveal">
+    Astro-Gyani · classical Aṣṭakoota computed from approximate planetary positions (±1°, Lahiri ayanāṁśa, Moon-chart Maṅgal Doṣa; standard simplifications applied). A guide to think clearly — not a substitute for a professional jyotiṣī or your own judgment. Score both ways: each should find the other their best fit.
+  </footer>
+</div>
+
+<script>
+/* ═══════════════ ASTRONOMY ENGINE ═══════════════ */
+const rad = d => d*Math.PI/180, deg = r => r*180/Math.PI;
+const norm = d => ((d%360)+360)%360;
+
+function julianDay(dateStr, timeStr, tzMin){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const [hh,mm] = (timeStr||'12:00').split(':').map(Number);
+  const utHours = hh + mm/60 - tzMin/60;
+  let Y=y, M=m;
+  if (M<=2){ Y-=1; M+=12; }
+  const A=Math.floor(Y/100), B=2-A+Math.floor(A/4);
+  return Math.floor(365.25*(Y+4716)) + Math.floor(30.6001*(M+1)) + d + B - 1524.5 + utHours/24;
+}
+
+function ayanamsa(jd){ // Lahiri approx
+  return 23.853 + 0.0139697*((jd-2451545)/365.25);
+}
+
+function moonLongitude(jd){ // Meeus low-precision, tropical, ±0.3°
+  const T=(jd-2451545)/36525;
+  const Lp=norm(218.3164477+481267.88123421*T);
+  const D =rad(norm(297.8501921+445267.1114034*T));
+  const M =rad(norm(357.5291092+35999.0502909*T));
+  const Mp=rad(norm(134.9633964+477198.8675055*T));
+  const F =rad(norm(93.2720950+483202.0175233*T));
+  let lon = Lp
+    + 6.288774*Math.sin(Mp) + 1.274027*Math.sin(2*D-Mp) + 0.658314*Math.sin(2*D)
+    + 0.213618*Math.sin(2*Mp) - 0.185116*Math.sin(M) - 0.114332*Math.sin(2*F)
+    + 0.058793*Math.sin(2*D-2*Mp) + 0.057066*Math.sin(2*D-M-Mp) + 0.053322*Math.sin(2*D+Mp)
+    + 0.045758*Math.sin(2*D-M) - 0.040923*Math.sin(M-Mp) - 0.034720*Math.sin(D)
+    - 0.030383*Math.sin(M+Mp) + 0.015327*Math.sin(2*D-2*F) - 0.012528*Math.sin(Mp+2*F)
+    + 0.010980*Math.sin(Mp-2*F);
+  return norm(lon);
+}
+
+// JPL approximate Keplerian elements (J2000 + per-century rates)
+const ELEMENTS = {
+  mercury:[0.38709927,0.20563593,7.00497902,252.25032350,77.45779628,48.33076593,
+           0.00000037,0.00001906,-0.00594749,149472.67411175,0.16047689,-0.12534081],
+  venus:  [0.72333566,0.00677672,3.39467605,181.97909950,131.60246718,76.67984255,
+           0.00000390,-0.00004107,-0.00078890,58517.81538729,0.00268329,-0.27769418],
+  earth:  [1.00000261,0.01671123,-0.00001531,100.46457166,102.93768193,0.0,
+           0.00000562,-0.00004392,-0.01294668,35999.37244981,0.32327364,0.0],
+  mars:   [1.52371034,0.09339410,1.84969142,-4.55343205,-23.94362959,49.55953891,
+           0.00001847,0.00007882,-0.00813131,19140.30268499,0.44441088,-0.29257343],
+  jupiter:[5.20288700,0.04838624,1.30439695,34.39644051,14.72847983,100.47390909,
+           -0.00011607,-0.00013253,-0.00183714,3034.74612775,0.21252668,0.20469106],
+  saturn: [9.53667594,0.05386179,2.48599187,49.95424423,92.59887831,113.66242448,
+           -0.00125060,-0.00050991,0.00193609,1222.49362201,-0.41897216,-0.28867794],
+};
+
+function kepler(M,e){ let E=M; for(let i=0;i<10;i++){ E -= (E-e*Math.sin(E)-M)/(1-e*Math.cos(E)); } return E; }
+
+function helioXYZ(name, T){
+  const el=ELEMENTS[name];
+  const a=el[0]+el[6]*T, e=el[1]+el[7]*T, I=rad(el[2]+el[8]*T);
+  const L=el[3]+el[9]*T, wb=el[4]+el[10]*T, O=el[5]+el[11]*T;
+  const M=rad(norm(L-wb)), w=rad(wb-O), Om=rad(O);
+  const E=kepler(M,e);
+  const xv=a*(Math.cos(E)-e), yv=a*Math.sqrt(1-e*e)*Math.sin(E);
+  const xw=Math.cos(w)*xv-Math.sin(w)*yv, yw=Math.sin(w)*xv+Math.cos(w)*yv;
+  return [
+    Math.cos(Om)*xw - Math.sin(Om)*yw*Math.cos(I),
+    Math.sin(Om)*xw + Math.cos(Om)*yw*Math.cos(I),
+    yw*Math.sin(I)
+  ];
+}
+
+function planetLongitude(name, jd){ // geocentric tropical ecliptic longitude
+  const T=(jd-2451545)/36525;
+  const p=helioXYZ(name,T), earth=helioXYZ('earth',T);
+  return norm(deg(Math.atan2(p[1]-earth[1], p[0]-earth[0])));
+}
+
+function chart(dateStr,timeStr,tzMin){
+  const jd=julianDay(dateStr,timeStr,tzMin);
+  const ay=ayanamsa(jd);
+  const sid = trop => norm(trop-ay);
+  const moon=sid(moonLongitude(jd));
+  const c={ jd, moon,
+    mars:sid(planetLongitude('mars',jd)),
+    mercury:sid(planetLongitude('mercury',jd)),
+    venus:sid(planetLongitude('venus',jd)),
+    jupiter:sid(planetLongitude('jupiter',jd)),
+    saturn:sid(planetLongitude('saturn',jd)),
+  };
+  c.moonRashi=Math.floor(moon/30); c.nak=Math.floor(moon/(360/27)); c.pada=Math.floor(moon/(360/108))%4+1;
+  c.marsRashi=Math.floor(c.mars/30); c.mercuryRashi=Math.floor(c.mercury/30);
+  c.venusRashi=Math.floor(c.venus/30); c.jupiterRashi=Math.floor(c.jupiter/30); c.saturnRashi=Math.floor(c.saturn/30);
+  return c;
+}
+
+/* ═══════════════ VEDIC TABLES ═══════════════ */
+const NAKS=['Ashwini','Bharani','Krittika','Rohini','Mrigashira','Ardra','Punarvasu','Pushya','Ashlesha','Magha',
+  'Purva Phalguni','Uttara Phalguni','Hasta','Chitra','Swati','Vishakha','Anuradha','Jyeshtha','Mula',
+  'Purva Ashadha','Uttara Ashadha','Shravana','Dhanishta','Shatabhisha','Purva Bhadrapada','Uttara Bhadrapada','Revati'];
+const RASHIS=['Meṣa ♈','Vṛṣabha ♉','Mithuna ♊','Karka ♋','Siṁha ♌','Kanyā ♍','Tulā ♎','Vṛścika ♏','Dhanu ♐','Makara ♑','Kumbha ♒','Mīna ♓'];
+const GANA=[0,1,2,1,0,1,0,0,2,2,1,1,0,2,0,2,0,2,2,1,1,0,2,2,1,1,0]; // 0 Deva 1 Manushya 2 Rakshasa
+const GANA_N=['Deva','Manuṣya','Rākṣasa'];
+const NADI=[0,1,2,2,1,0,0,1,2,2,1,0,0,1,2,2,1,0,0,1,2,2,1,0,0,1,2]; // 0 Adi 1 Madhya 2 Antya
+const NADI_N=['Ādi','Madhya','Antya'];
+const YONI=[0,1,2,3,3,4,5,2,5,6,6,7,8,9,8,9,10,10,4,11,12,11,13,0,13,7,1];
+const YONI_N=['Horse','Elephant','Sheep','Serpent','Dog','Cat','Rat','Cow','Buffalo','Tiger','Deer','Monkey','Mongoose','Lion'];
+const YONI_M=[
+[4,2,2,3,2,2,2,3,0,1,3,3,2,1],[2,4,3,3,2,2,2,2,3,1,2,3,2,0],[2,3,4,2,1,2,1,3,3,1,2,0,3,1],
+[3,3,2,4,2,1,1,1,1,2,2,2,0,2],[2,2,1,2,4,2,1,2,2,1,0,2,1,1],[2,2,2,1,2,4,0,2,2,1,3,3,2,1],
+[2,2,1,1,1,0,4,2,2,2,2,2,1,2],[3,2,3,1,2,2,2,4,3,0,3,2,2,1],[0,3,3,1,2,2,2,3,4,1,2,2,2,1],
+[1,1,1,2,1,1,2,0,1,4,1,1,2,1],[3,2,2,2,0,3,2,3,2,1,4,2,2,1],[3,3,0,2,2,3,2,2,2,1,2,4,3,2],
+[2,2,3,0,1,2,1,2,2,2,2,3,4,2],[1,0,1,2,1,1,2,1,1,1,1,2,2,4]];
+const VARNA=[2,1,0,3,2,1,0,3,2,1,0,3]; // rank: 3 Brahmin 2 Kshatriya 1 Vaishya 0 Shudra
+const VASHYA=['Q','Q','H','J','W','H','H','K','Q','Q','H','J'];
+const VASHYA_M={H:{H:2,Q:1,J:.5,W:.5,K:1},Q:{Q:2,H:1,J:1,W:0,K:1},J:{J:2,H:.5,Q:1,W:1,K:1},W:{W:2,H:.5,Q:0,J:1,K:0},K:{K:2,H:1,Q:1,J:1,W:0}};
+const LORD=[2,5,3,1,0,3,5,2,4,6,6,4]; // 0Sun 1Moon 2Mars 3Mercury 4Jupiter 5Venus 6Saturn
+const PLANET_N=['Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn'];
+const FRIEND={0:[1,2,4],1:[0,3],2:[0,1,4],3:[0,5],4:[0,1,2],5:[3,6],6:[3,5]};
+const ENEMY ={0:[5,6],1:[],2:[3],3:[1],4:[3,5],5:[0,1],6:[0,1,2]};
+const EXALT={0:0,1:1,2:9,3:5,4:3,5:11,6:6};
+const OWN={0:[4],1:[3],2:[0,7],3:[2,5],4:[8,11],5:[1,6],6:[9,10]};
+
+function relation(a,b){
+  if(a===b) return 'same';
+  if(FRIEND[a].includes(b)) return 'friend';
+  if(ENEMY[a].includes(b)) return 'enemy';
+  return 'neutral';
+}
+function dignity(planet,rashi){ // 4 exalted, 3 own, 2 friend, 1 neutral, .5 enemy, 0 debilitated
+  if(rashi===EXALT[planet]) return 4;
+  if(OWN[planet].includes(rashi)) return 3;
+  if(rashi===(EXALT[planet]+6)%12) return 0;
+  const r=relation(planet,LORD[rashi]);
+  return r==='friend'||r==='same' ? 2 : r==='neutral' ? 1 : .5;
+}
+
+/* ═══════════════ ASHTAKOOTA ═══════════════ */
+function ashtakoota(g,b){ // g=groom chart, b=bride chart
+  const K={};
+  K.varna = VARNA[g.moonRashi] >= VARNA[b.moonRashi] ? 1 : 0;
+  K.vashya = VASHYA_M[VASHYA[g.moonRashi]][VASHYA[b.moonRashi]];
+  const taraOf=(from,to)=>{ const t=(((to-from+27)%27)+1)%9; return [3,5,7,0].includes(t)&&t!==0 ? 0 : ([3,5,7].includes(t)?0:1.5); };
+  const t1=(((b.nak-g.nak+27)%27)+1)%9, t2=(((g.nak-b.nak+27)%27)+1)%9;
+  K.tara = ([3,5,7].includes(t1===0?9:t1)?0:1.5) + ([3,5,7].includes(t2===0?9:t2)?0:1.5);
+  K.yoni = YONI_M[YONI[g.nak]][YONI[b.nak]];
+  const lg=LORD[g.moonRashi], lb=LORD[b.moonRashi];
+  const r1=relation(lg,lb), r2=relation(lb,lg);
+  if(lg===lb) K.maitri=5;
+  else{
+    const pair=[r1,r2].sort().join('-');
+    K.maitri = pair==='friend-friend'?5 : pair==='friend-neutral'?4 : pair==='neutral-neutral'?3
+      : pair==='enemy-friend'?1 : pair==='enemy-neutral'?0.5 : 0;
+  }
+  const gg=GANA[g.nak], gb=GANA[b.nak];
+  K.gana = gg===gb?6 : (gg!==2&&gb!==2)?5 : (gg===1&&gb===2)||(gg===2&&gb===1)?0 : 1;
+  const d=(b.moonRashi-g.moonRashi+12)%12;
+  K.bhakoot = [1,11,4,8,5,7].includes(d)?0:7;
+  K.nadi = NADI[g.nak]===NADI[b.nak]?0:8;
+  K.total = K.varna+K.vashya+K.tara+K.yoni+K.maitri+K.gana+K.bhakoot+K.nadi;
+  return K;
+}
+
+function manglik(c){
+  const house=((c.marsRashi-c.moonRashi+12)%12)+1;
+  const is=[1,2,4,7,8,12].includes(house);
+  const cancelled=is && [0,7,9].includes(c.marsRashi); // Mars own/exalted
+  return {is,cancelled,house};
+}
+
+/* ═══════════════ SCORE MAPPING ═══════════════ */
+const r05=v=>Math.round(v*2)/2;
+const clamp=(v,max)=>Math.min(max,Math.max(0,r05(v)));
+const FIRE=[0,4,8],EARTH=[1,5,9],AIR=[2,6,10],WATER=[3,7,11];
+const FIXED=[1,4,7,10],CARDINAL=[0,3,6,9];
+
+function computeScores(g,b,ageDiff){
+  const K=ashtakoota(g,b);
+  const mg=manglik(g), mb=manglik(b);
+  const S={};
+  // Section A — direct astrology
+  S.A0 = K.total>=24?8 : K.total>=18?4 : 0;
+  S.A1 = K.nadi===8?5:0;
+  S.A2 = K.gana===6?3 : K.gana===5?2.5 : K.gana===1?1 : 0;
+  S.A3 = K.bhakoot===7?4 : (K.maitri>=4?2:0); // bhakoot dosha softened by strong maitri
+  S.A4 = (mg.is===mb.is)?4 : ((mg.is&&mg.cancelled)||(mb.is&&mb.cancelled))?2.5:0.5;
+  const seventhLord=LORD[(b.moonRashi+6)%12];
+  const sevDig=dignity(seventhLord, [b.mercuryRashi,b.venusRashi,b.marsRashi,b.jupiterRashi,b.saturnRashi,b.moonRashi][
+    [3,5,2,4,6,1].indexOf(seventhLord)] ?? b.moonRashi);
+  S.A5 = clamp(sevDig===4?3:sevDig===3?2.5:sevDig===2?2:sevDig===1?1.5:sevDig===0.5?1:0.5, 3);
+  const jd_=dignity(4,b.jupiterRashi), vd=dignity(5,b.venusRashi);
+  const map15=l=>l===4?1.5:l===3?1.25:l===2?1:l===1?.75:l===.5?.5:.25;
+  S.A6 = clamp(map15(jd_)+map15(vd), 3);
+  // Her chart factors for B–D
+  const mR=b.moonRashi, gana=GANA[b.nak];
+  const sat=dignity(6,b.saturnRashi), jup=dignity(4,b.jupiterRashi),
+        mer=dignity(3,b.mercuryRashi), ven=dignity(5,b.venusRashi);
+  const isW=WATER.includes(mR), isE=EARTH.includes(mR), isF=FIRE.includes(mR);
+  const isFix=FIXED.includes(mR), isCar=CARDINAL.includes(mR);
+  // Section B — Loyalty & Constancy (suggested)
+  S.B0 = clamp((gana===0?6.5:gana===1?5.5:4.5)+(isW?.5:0)+(sat>=3?1:sat===2?.5:0), 8);
+  S.B1 = clamp((isFix?6.5:isCar?5:4)+(isE?.5:0)+(sat>=3?1:0), 8);
+  S.B2 = clamp((isW?4.5:isE?4:3)+(mR===7?.5:0), 5);
+  S.B3 = clamp(sat===4?5:sat===3?4.5:sat===2?4:sat===1?3.5:sat===.5?2.5:2, 5);
+  S.B4 = clamp(jup===4?4:jup===3?3.5:jup===2?3:jup===1?2.5:jup===.5?2:1.5, 4);
+  // Section C — Temperament
+  S.C0 = clamp(isW?5:isE?4:isF?3.5:3, 5);
+  S.C1 = clamp((isFix?4.5:3.5)+(isW?.5:0), 5);
+  S.C2 = clamp(mer===4?5:mer===3?4.5:mer===2?4:mer===1?3.5:mer===.5?3:2.5, 5);
+  S.C3 = clamp((isE?4.5:isW?4:3)+(isFix?.5:0), 5);
+  // Section D — Life & Presence
+  S.D0 = clamp(jup===4?5:jup===3?4.5:jup===2?4:jup===1?3.5:jup===.5?3:2.5, 5);
+  S.D1 = clamp(2+((mer+jup)/2)/2, 4);
+  S.D2 = clamp(mR===3||mR===1?4:(isW||isE)?3.5:3, 4);
+  S.D3 = clamp(ven===4?4:ven===3?3.5:ven>=1?3:ven===.5?2.5:2, 4);
+  S.D4 = ageDiff<=3?3:ageDiff<=5?2:ageDiff<=7?1:0.5;
+  return {S,K,mg,mb};
+}
+
+/* ═══════════════ SCORECARD DATA ═══════════════ */
+const DATA=[
+  {id:'A',title:'A · Astrological Compatibility',max:30,note:'computed from both charts',items:[
+    ['Guṇa Milan score (≥24 = full, 18–23 = half, <18 = 0)',8],
+    ['Nāḍī differs — <i>critical</i>',5],
+    ['Gaṇa harmony',3],
+    ['Moon-sign harmony / Bhakūṭa ok or softened',4],
+    ['Maṅgal Doṣa matched or cancelled',4],
+    ['Her 7th lord dignity',3],
+    ['Strong Jupiter / Venus in her chart',3]]},
+  {id:'B',title:'B · Loyalty & Constancy',max:30,note:'suggested from her chart — verify in life',items:[
+    ['Absolute trustworthiness & transparency',8],
+    ['Steady in commitment — doesn’t drift to novelty',8],
+    ['Depth over surface; not chasing excitement',5],
+    ['Emotionally mature & steady, not easily swayed',5],
+    ['Shared long-term vision & intent to commit',4]]},
+  {id:'C',title:'C · Temperament & Connection',max:20,note:'suggested from her chart',items:[
+    ['Warm & caring — softens intensity',5],
+    ['Respects privacy & inner world',5],
+    ['Intelligent & articulate — real conversation',5],
+    ['Patient',5]]},
+  {id:'D',title:'D · Life, Family & Presence',max:20,note:'suggested from her chart',items:[
+    ['Settled, respectable, values-driven family',5],
+    ['Educated & capable / working',4],
+    ['Home & family oriented',4],
+    ['Attractive, graceful, Venusian presence',4],
+    ['Age gap (computed from DOBs)',3]]},
+];
+
+const BANNERS={
+  A:{label:'Written in the Stars',svg:`<svg viewBox="0 0 800 96" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bgA" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2a1e5c"/><stop offset="55%" stop-color="#3d2a6d"/><stop offset="100%" stop-color="#1a1440"/></linearGradient></defs><rect width="800" height="96" fill="url(#bgA)"/><ellipse cx="620" cy="48" rx="150" ry="34" fill="none" stroke="rgba(233,196,106,.35)"/><ellipse cx="620" cy="48" rx="100" ry="20" fill="none" stroke="rgba(196,181,253,.3)"/><circle cx="620" cy="48" r="16" fill="#e9c46a" opacity=".9"/><circle cx="740" cy="34" r="6" fill="#c4b5fd"/><circle cx="510" cy="62" r="4.5" fill="#f6a5c0"/><path d="M120 30 a16 16 0 1 0 14 24 a13 13 0 1 1 -14 -24z" fill="#f6e27a" opacity=".9"/><g fill="#fff"><circle cx="60" cy="20" r="1.6"/><circle cx="210" cy="14" r="1.2"/><circle cx="300" cy="70" r="1.8"/><circle cx="390" cy="24" r="1.3"/><circle cx="450" cy="80" r="1.5"/><circle cx="700" cy="78" r="1.4"/></g><path d="M340 40 l4 9 9 4 -9 4 -4 9 -4 -9 -9 -4 9 -4z" fill="rgba(233,196,106,.85)"/></svg>`},
+  B:{label:'The Loyal Heart',svg:`<svg viewBox="0 0 800 96" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bgB" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#5c1e3a"/><stop offset="55%" stop-color="#7a2a4a"/><stop offset="100%" stop-color="#3a1228"/></linearGradient></defs><rect width="800" height="96" fill="url(#bgB)"/><path d="M400 74 C 356 46 342 24 362 14 C 378 6 396 18 400 30 C 404 18 422 6 438 14 C 458 24 444 46 400 74 Z" fill="rgba(248,113,113,.85)" stroke="rgba(255,255,255,.35)" stroke-width="1.5"/><rect x="391" y="36" width="18" height="15" rx="3" fill="#e9c46a"/><path d="M394 36 v-5 a6 6 0 0 1 12 0 v5" fill="none" stroke="#e9c46a" stroke-width="3"/><path d="M160 66 q22 -34 52 -22 q-8 4 -10 14 q20 -8 30 8 q-42 14 -72 0z" fill="rgba(255,255,255,.35)"/><path d="M640 66 q-22 -34 -52 -22 q8 4 10 14 q-20 -8 -30 8 q42 14 72 0z" fill="rgba(255,255,255,.35)"/><g fill="rgba(255,255,255,.7)"><circle cx="90" cy="24" r="1.5"/><circle cx="280" cy="18" r="1.2"/><circle cx="520" cy="16" r="1.4"/><circle cx="720" cy="28" r="1.6"/></g></svg>`},
+  C:{label:'Two Minds, One Rhythm',svg:`<svg viewBox="0 0 800 96" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bgC" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2c2560"/><stop offset="55%" stop-color="#463a85"/><stop offset="100%" stop-color="#1d1845"/></linearGradient></defs><rect width="800" height="96" fill="url(#bgC)"/><rect x="290" y="20" width="110" height="38" rx="12" fill="rgba(196,181,253,.85)"/><path d="M310 58 l-8 14 20 -14z" fill="rgba(196,181,253,.85)"/><circle cx="320" cy="39" r="4" fill="#2c2560"/><circle cx="345" cy="39" r="4" fill="#2c2560"/><circle cx="370" cy="39" r="4" fill="#2c2560"/><rect x="420" y="34" width="96" height="34" rx="12" fill="rgba(233,196,106,.9)"/><path d="M496 68 l8 13 -20 -13z" fill="rgba(233,196,106,.9)"/><path d="M440 51 c 5 -8 14 -4 14 2 c 0 -6 9 -10 14 -2 c 4 7 -7 13 -14 18 c -7 -5 -18 -11 -14 -18z" fill="#5c1e3a"/><path d="M120 60 q14 -18 34 -10 l-6 10 q16 -4 22 8 q-30 10 -50 -8z" fill="rgba(255,255,255,.4)"/><path d="M660 44 q14 -18 34 -10 l-6 10 q16 -4 22 8 q-30 10 -50 -8z" fill="rgba(255,255,255,.3)"/></svg>`},
+  D:{label:'Home & Hearth',svg:`<svg viewBox="0 0 800 96" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bgD" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#14424a"/><stop offset="55%" stop-color="#1d5c58"/><stop offset="100%" stop-color="#0e2e38"/></linearGradient><radialGradient id="flame" cx="50%" cy="35%" r="65%"><stop offset="0%" stop-color="#fff3c4"/><stop offset="60%" stop-color="#e9c46a"/><stop offset="100%" stop-color="#b8600b"/></radialGradient></defs><rect width="800" height="96" fill="url(#bgD)"/><path d="M360 52 L400 22 L440 52 Z" fill="rgba(233,196,106,.9)"/><rect x="370" y="52" width="60" height="30" fill="rgba(255,255,255,.85)"/><rect x="392" y="62" width="16" height="20" rx="2" fill="#14424a"/><rect x="376" y="57" width="10" height="10" rx="1" fill="#e9c46a"/><rect x="414" y="57" width="10" height="10" rx="1" fill="#e9c46a"/><path d="M540 78 q4 -22 20 -22 q16 0 20 22z" fill="#b8860b"/><ellipse cx="560" cy="78" rx="24" ry="4" fill="#8a5f08"/><path d="M560 40 q8 10 0 18 q-8 -8 0 -18z" fill="url(#flame)"/><circle cx="220" cy="42" r="16" fill="rgba(74,222,128,.5)"/><circle cx="204" cy="52" r="12" fill="rgba(74,222,128,.4)"/><circle cx="236" cy="54" r="12" fill="rgba(74,222,128,.4)"/><rect x="216" y="58" width="7" height="24" rx="2" fill="#7a5a2a"/></svg>`},
+};
+
+/* ═══════════════ UI ═══════════════ */
+const KEY='spouseScorecard.v4';
+let saved={};
+try{ saved=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){}
+
+// timezone selects
+const TZS=[[330,'India +05:30 (IST)'],[345,'Nepal +05:45'],[300,'Pakistan +05:00'],[360,'Bangladesh +06:00'],
+  [240,'Gulf +04:00'],[0,'UTC +00:00'],[60,'Central Europe +01:00'],[-300,'US Eastern −05:00'],
+  [-360,'US Central −06:00'],[-480,'US Pacific −08:00'],[480,'Singapore/China +08:00'],[540,'Japan +09:00'],[600,'Sydney +10:00']];
+['p1tz','p2tz'].forEach(id=>{
+  const sel=document.getElementById(id);
+  TZS.forEach(([v,l])=>{ const o=document.createElement('option'); o.value=v; o.textContent=l; sel.appendChild(o); });
+  sel.value=330;
+});
+
+// restore inputs
+if(saved._inputs){
+  ['1','2'].forEach(n=>{
+    const p=saved._inputs['p'+n]; if(!p) return;
+    document.getElementById('p'+n+'name').value=p.name||'';
+    document.getElementById('p'+n+'date').value=p.date||'';
+    document.getElementById('p'+n+'time').value=p.time||'12:00';
+    document.getElementById('p'+n+'tz').value=p.tz??330;
+  });
+}
+
+// build scorecard
+const wrap=document.getElementById('sections');
+DATA.forEach(sec=>{
+  const card=document.createElement('section');
+  card.className='card reveal';
+  const b=BANNERS[sec.id];
+  card.innerHTML=`
+    <div class="banner">${b.svg}<div class="b-title">${b.label}</div></div>
+    <div class="sect-head">
+      <h2>${sec.title} (${sec.max})${sec.note?' — <span>'+sec.note+'</span>':''}</h2>
+      <div class="sect-score" id="ss-${sec.id}">0 / ${sec.max}</div>
+    </div>
+    <div class="sectbar"><i id="sb-${sec.id}"></i></div>
+    ${sec.items.map((it,ii)=>{
+      const k=sec.id+ii, v=saved[k]??0;
+      return `<div class="row reveal" style="transition-delay:${ii*70}ms">
+        <div class="row-label">${it[0]}</div>
+        <div class="row-ctrl">
+          <span class="stars" id="st-${k}"></span>
+          <input type="range" min="0" max="${it[1]}" step="0.5" value="${v}" data-key="${k}" data-sec="${sec.id}" data-max="${it[1]}">
+          <span class="val" id="v-${k}">${v}/${it[1]}</span>
+        </div>
+      </div>`;
+    }).join('')}`;
+  wrap.appendChild(card);
+});
+
+const sliders=[...document.querySelectorAll('input[type=range]')];
+sliders.forEach(s=>s.addEventListener('input',()=>update(s.dataset.sec)));
+
+function herName(){ return (saved._inputs?.p2?.name||'').trim(); }
+function calcScores(){ return saved._calc?.scores||null; }
+
+/* ═══════════════ CALCULATE ═══════════════ */
+function readPerson(n){
+  return {
+    name:document.getElementById('p'+n+'name').value.trim(),
+    date:document.getElementById('p'+n+'date').value,
+    time:document.getElementById('p'+n+'time').value||'12:00',
+    tz:+document.getElementById('p'+n+'tz').value,
+  };
+}
+
+function calculate(){
+  const p1=readPerson(1), p2=readPerson(2);
+  const err=document.getElementById('formErr');
+  if(!p1.date||!p2.date){ err.textContent='⚠ Please enter both dates of birth.'; err.style.display='block'; return; }
+  err.style.display='none';
+  saved._inputs={p1,p2};
+
+  const g=chart(p1.date,p1.time,p1.tz);
+  const b=chart(p2.date,p2.time,p2.tz);
+  const ageDiff=Math.abs((new Date(p1.date)-new Date(p2.date))/(365.25*24*3600*1000));
+  const {S,K,mg,mb}=computeScores(g,b,ageDiff);
+
+  saved._calc={scores:S,
+    meta:{K,
+      g:{rashi:g.moonRashi,nak:g.nak,pada:g.pada,deg:g.moon,manglik:mg},
+      b:{rashi:b.moonRashi,nak:b.nak,pada:b.pada,deg:b.moon,manglik:mb},
+      ageDiff:Math.round(ageDiff*10)/10}};
+  applyScores(S);
+  renderSummary();
+  persist();
+  update();
+  document.getElementById('astro-summary').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function applyScores(S){
+  sliders.forEach(s=>{ s.value=S[s.dataset.key]??0; });
+  document.getElementById('restoreBtn').disabled=false;
+}
+
+function renderSummary(){
+  const c=saved._calc; if(!c) return;
+  const m=c.meta, p1=saved._inputs.p1, p2=saved._inputs.p2;
+  const person=(name,d,tag)=>`
+    <div class="sum-person"><h4>${name||tag}</h4>
+      <div>Moon sign (rāśi): <b>${RASHIS[d.rashi]}</b> · ${(d.deg%30).toFixed(1)}°</div>
+      <div>Nakṣatra: <b>${NAKS[d.nak]}</b> (pada ${d.pada})</div>
+      <div>Gaṇa: <b>${GANA_N[GANA[d.nak]]}</b> · Nāḍī: <b>${NADI_N[NADI[d.nak]]}</b> · Yoni: <b>${YONI_N[YONI[d.nak]]}</b></div>
+      <div>Maṅgal Doṣa: <b class="${d.manglik.is?'mangal-yes':'mangal-no'}">${d.manglik.is?(d.manglik.cancelled?'Yes (cancelled — Mars strong)':'Yes (Mars in house '+d.manglik.house+' from Moon)'):'No'}</b></div>
+    </div>`;
+  document.getElementById('sumGrid').innerHTML=person(p1.name,m.g,'Person 1')+person(p2.name,m.b,'Person 2');
+  const KOOTAS=[['Varṇa',m.K.varna,1],['Vaśya',m.K.vashya,2],['Tārā',m.K.tara,3],['Yoni',m.K.yoni,4],
+    ['Graha Maitrī',m.K.maitri,5],['Gaṇa',m.K.gana,6],['Bhakūṭa',m.K.bhakoot,7],['Nāḍī',m.K.nadi,8]];
+  document.getElementById('kootaList').innerHTML=KOOTAS.map(([n,v,mx])=>`
+    <div class="koota-row"><span class="kname">${n}</span>
+    <span class="kbar"><i class="${v===0?'kzero':''}" style="width:0%" data-w="${v/mx*100}"></i></span>
+    <span class="kval">${Number.isInteger(v)?v:v.toFixed(1)} / ${mx}</span></div>`).join('');
+  const gt=m.K.total;
+  document.getElementById('gunaTotal').textContent=
+    `Guṇa Milan: ${Number.isInteger(gt)?gt:gt.toFixed(1)} / 36 ${gt>=24?'— very good ✓':gt>=18?'— acceptable':'— below traditional threshold ✗'} · Age gap: ${m.ageDiff} yrs`;
+  const box=document.getElementById('astro-summary');
+  box.style.display='block';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    box.querySelectorAll('.kbar i').forEach(i=>i.style.width=i.dataset.w+'%');
+  }));
+}
+
+function restoreCalc(){
+  const S=calcScores(); if(!S) return;
+  applyScores(S); update();
+}
+
+function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){} }
+
+/* ═══════════════ SCORE / VERDICT UI ═══════════════ */
+function stars(v,max){ const n=Math.round((v/max)*5); return '★'.repeat(n)+'<span class="off">'+'★'.repeat(5-n)+'</span>'; }
+const BANDS=[
+  {min:80,cls:'v1',n:1,title:'✨ Excellent Match',text:'Proceed with confidence — the stars and the heart agree.',hud:'Excellent — proceed with confidence',color:'#4ade80'},
+  {min:65,cls:'v2',n:2,title:'💜 Strong Match',text:'Promising. Mind the low-scoring rows — those are your conversations to have.',hud:'Strong — promising, mind the gaps',color:'#c4b5fd'},
+  {min:50,cls:'v3',n:3,title:'🌗 Mixed Match',text:'Only worth pursuing if Section B (Loyalty & Constancy) is high. Watch and wait.',hud:'Mixed — only if Section B is high',color:'#fbbf24'},
+  {min:0,cls:'v4',n:4,title:'🛑 Poor Fit',text:'The scorecard says walk away. Trust the pattern, not the hope.',hud:'Poor fit — walk away',color:'#f87171'},
+];
+let celebrated=false, displayTotal=0, targetTotal=0, rafId=null;
+function animateTotal(){
+  const el=document.getElementById('totalNum');
+  cancelAnimationFrame(rafId);
+  (function step(){
+    displayTotal+=(targetTotal-displayTotal)*.15;
+    if(Math.abs(targetTotal-displayTotal)<.05) displayTotal=targetTotal;
+    el.textContent=Number.isInteger(displayTotal)?displayTotal:displayTotal.toFixed(1);
+    if(displayTotal!==targetTotal) rafId=requestAnimationFrame(step);
+  })();
+}
+const fmt=n=>Number.isInteger(n)?n:n.toFixed(1);
+
+function update(bumpSec){
+  let total=0,touched=false;
+  const secTotals={}; DATA.forEach(s=>secTotals[s.id]=0);
+  const CS=calcScores();
+  sliders.forEach(s=>{
+    const v=+s.value,k=s.dataset.key,max=+s.dataset.max;
+    secTotals[s.dataset.sec]+=v; total+=v;
+    if(v>0) touched=true;
+    saved[k]=v;
+    s.style.setProperty('--fill',(v/max*100)+'%');
+    const el=document.getElementById('v-'+k);
+    el.textContent=fmt(v)+'/'+max;
+    el.className='val'+(v===max?' full':v===0?' zero':'')+((CS&&CS[k]!==undefined&&CS[k]!==v)?' tweaked':'');
+    document.getElementById('st-'+k).innerHTML=stars(v,max);
+  });
+  total=Math.round(total*2)/2;
+  persist();
+  DATA.forEach(sec=>{
+    const t=Math.round(secTotals[sec.id]*2)/2;
+    document.getElementById('ss-'+sec.id).textContent=fmt(t)+' / '+sec.max;
+    document.getElementById('sb-'+sec.id).style.width=(t/sec.max*100)+'%';
+    if(sec.id===bumpSec){ const el=document.getElementById('ss-'+sec.id); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+  });
+  const secB=Math.round(secTotals['B']*2)/2;
+  targetTotal=total; animateTotal();
+  const arc=document.getElementById('gaugeArc');
+  arc.style.strokeDashoffset=207.3*(1-total/100);
+  document.getElementById('miniFill').style.width=total+'%';
+  const band=BANDS.find(b=>total>=b.min);
+  arc.style.stroke=band.color;
+  arc.style.filter='drop-shadow(0 0 6px '+band.color+'80)';
+  document.getElementById('hud').classList.toggle('glow',total>=65);
+
+  const gatePill=document.getElementById('gatePill');
+  const gatePass=secB>=15;
+  const bTouched=sliders.some(s=>s.dataset.sec==='B'&&+s.value>0);
+  if(!bTouched){ gatePill.className='gate-pill pending'; gatePill.textContent='🔒 Constancy Gate: —'; }
+  else if(gatePass){ gatePill.className='gate-pill pass'; gatePill.textContent='🔓 Constancy Gate: PASSED ('+fmt(secB)+'/30)'; }
+  else{ gatePill.className='gate-pill fail'; gatePill.textContent='⚠ Constancy Gate: BELOW 15 ('+fmt(secB)+'/30)'; }
+
+  const verdict=document.getElementById('verdict'), vGate=document.getElementById('vGate');
+  document.querySelectorAll('.bands span').forEach(sp=>sp.classList.toggle('active',+sp.dataset.band===band.n));
+
+  if(!touched){
+    verdict.classList.remove('v1','v2','v3','v4');
+    document.getElementById('vTitle').textContent='Awaiting calculation…';
+    document.getElementById('vText').textContent='Enter both birth details and press Calculate Match.';
+    document.getElementById('hudBand').textContent='Enter birth details above ✨';
+    document.getElementById('hudBand').style.color='';
+    vGate.style.display='none';
+    return;
+  }
+  verdict.classList.remove('v1','v2','v3','v4');
+  verdict.classList.add(band.cls);
+  const who=herName();
+  document.getElementById('vTitle').textContent=(who?who+' · ':'')+band.title+' — '+fmt(total)+'/100';
+  document.getElementById('vText').textContent=band.text;
+  document.getElementById('hudBand').textContent=(who?who+': ':'')+fmt(total)+'/100 · '+band.hud;
+  document.getElementById('hudBand').style.color=band.color;
+  vGate.style.display='inline-block';
+  if(!gatePass&&bTouched){
+    vGate.className='gate-note fail';
+    vGate.textContent='⚠ Constancy Gate failed (Section B '+fmt(secB)+'/30 < 15) — caution regardless of total. Wait and watch, don’t commit.';
+    document.getElementById('hudMsg').textContent='Gate overrides the total — loyalty first.';
+  }else if(gatePass){
+    vGate.className='gate-note pass';
+    vGate.textContent='✓ Constancy Gate passed — Section B '+fmt(secB)+'/30';
+    document.getElementById('hudMsg').textContent='Verdict is live. Tweak freely or restore the calculated values.';
+  }else{ vGate.style.display='none'; }
+  if(total>=80&&gatePass&&!celebrated){ celebrated=true; confetti(); }
+  if(total<80) celebrated=false;
+}
+
+function confetti(){
+  const glyphs=['✦','❀','✿','♥','✨','ॐ','★'], colors=['#e9c46a','#c4b5fd','#f87171','#4ade80','#f6e27a'];
+  for(let i=0;i<70;i++){
+    const el=document.createElement('div'); el.className='confetti';
+    el.textContent=glyphs[Math.floor(Math.random()*glyphs.length)];
+    el.style.left=Math.random()*100+'vw';
+    el.style.color=colors[Math.floor(Math.random()*colors.length)];
+    el.style.fontSize=(12+Math.random()*18)+'px';
+    el.style.animationDuration=(2.2+Math.random()*2.5)+'s';
+    el.style.animationDelay=(Math.random()*.8)+'s';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),6000);
+  }
+}
+
+function resetAll(){
+  if(!confirm('Clear all inputs, calculations and ratings?')) return;
+  sliders.forEach(s=>s.value=0);
+  saved={}; celebrated=false;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  ['1','2'].forEach(n=>{
+    document.getElementById('p'+n+'name').value=n==='1'?'Mayank':'';
+    document.getElementById('p'+n+'date').value='';
+    document.getElementById('p'+n+'time').value='12:00';
+    document.getElementById('p'+n+'tz').value=330;
+  });
+  document.getElementById('astro-summary').style.display='none';
+  document.getElementById('restoreBtn').disabled=true;
+  update();
+}
+
+/* ═══════════════ AMBIENCE ═══════════════ */
+(function(){ // starfield: 2 nodes total via box-shadow (fast)
+  const sky=document.getElementById('stars');
+  function layer(n,cls){
+    const d=document.createElement('div');
+    d.className='starlayer '+cls;
+    const sh=[];
+    for(let i=0;i<n;i++){
+      sh.push((Math.random()*100).toFixed(1)+'vw '+(Math.random()*100).toFixed(1)+'vh 0 '
+        +(Math.random()*1.1).toFixed(1)+'px rgba(255,255,255,'+(.4+Math.random()*.6).toFixed(2)+')');
+    }
+    d.style.boxShadow=sh.join(',');
+    sky.appendChild(d);
+  }
+  layer(42,'sl1'); layer(36,'sl2');
+})();
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+/* ── Radian-style master scroll system (lerped inertia) ── */
+const lerp=(a,c,t)=>a+(c-a)*t;
+const layers=[...document.querySelectorAll('.layer')];
+const heroMandala=document.getElementById('heroMandala');
+const bannerSvgs=[...document.querySelectorAll('.banner svg')];
+const scrubEl=document.getElementById('scrub');
+const scrubWheel=document.getElementById('scrubWheel');
+const KOOTA_INFO=[
+  ['Varṇa','Spiritual grain & ego balance — does his nature respect hers?','worth 1 point'],
+  ['Vaśya','Mutual magnetism — the pull of influence between the two.','worth 2 points'],
+  ['Tārā','Birth-star destiny — health & fortune woven between the stars.','worth 3 points'],
+  ['Yoni','Instinctive & physical nature — the animal signs must agree.','worth 4 points'],
+  ['Graha Maitrī','Friendship of the Moon lords — the mental wavelength.','worth 5 points'],
+  ['Gaṇa','Temperament tribe — Deva, Manuṣya, or Rākṣasa.','worth 6 points'],
+  ['Bhakūṭa','Moon-sign geometry — prosperity & the growth of family.','worth 7 points'],
+  ['Nāḍī','The pulse of prāṇa — health of the lineage. The heaviest koota.','worth 8 points'],
+];
+let scrubLast=-1;
+function swapScrub(idx){
+  const t=document.getElementById('scrubTitle'),d=document.getElementById('scrubDesc'),
+        c=document.getElementById('scrubIdx'),m=document.getElementById('scrubMax');
+  t.classList.add('swap'); d.classList.add('swap');
+  setTimeout(()=>{
+    const k=KOOTA_INFO[idx];
+    c.textContent=String(idx+1).padStart(2,'0');
+    t.textContent=k[0]; d.textContent=k[1]; m.textContent=k[2];
+    t.classList.remove('swap'); d.classList.remove('swap');
+  },200);
+}
+// section counter
+const secList=[...document.querySelectorAll('#hero,#form-sect,#scrub,#astro-summary,section.card,#statement,#verdict')];
+document.getElementById('secCounterTotal').textContent=String(secList.length).padStart(2,'0');
+const cntEl=document.getElementById('secCounterNum');
+const progBar=document.getElementById('scrollProgress');
+const pctEl=document.getElementById('scrollPctNum');
+let curY=window.scrollY, lastY=-1;
+(function masterLoop(){
+  const target=window.scrollY;
+  curY=lerp(curY,target,.09);
+  if(Math.abs(curY-target)<.1) curY=target;
+  if(curY===lastY){ requestAnimationFrame(masterLoop); return; } // idle: skip all DOM work
+  lastY=curY;
+  const vh=window.innerHeight;
+  layers.forEach(l=>l.style.transform='translateX(-50%) translateY('+(curY*+l.dataset.p)+'px)');
+  if(heroMandala&&curY<vh*1.4)
+    heroMandala.style.transform='translate(-50%,-50%) rotate('+(curY*.05)+'deg) scale('+(1+curY*.0003)+')';
+  // banner image parallax (drift inside mask, Radian-style)
+  bannerSvgs.forEach(sv=>{
+    const r=sv.parentElement.getBoundingClientRect();
+    if(r.bottom<-40||r.top>vh+40) return;
+    const p=(vh-r.top)/(vh+r.height);
+    sv.style.transform='translateY('+((p-.5)*30)+'px) scale(1.18)';
+  });
+  // pinned scrub
+  if(scrubEl){
+    const r=scrubEl.getBoundingClientRect();
+    if(r.top<vh&&r.bottom>0){
+      const p=Math.min(1,Math.max(0,-r.top/(r.height-vh)));
+      scrubWheel.style.transform='rotate('+(p*360)+'deg)';
+      const idx=Math.min(7,Math.floor(p*8));
+      if(idx!==scrubLast){ scrubLast=idx; if(idx>=0) swapScrub(idx); }
+    }
+  }
+  // section counter
+  const mid=curY+vh*.45;
+  let ci=0;
+  for(let i=0;i<secList.length;i++){ if(secList[i].offsetTop<=mid) ci=i; }
+  const cs=String(ci+1).padStart(2,'0');
+  if(cntEl.textContent!==cs) cntEl.textContent=cs;
+  // scroll progress bar + percentage (Genesis-style)
+  const docH=document.documentElement.scrollHeight-vh;
+  const prog=docH>0?Math.min(1,Math.max(0,curY/docH)):0;
+  progBar.style.width=(prog*100)+'%';
+  const ps=Math.round(prog*100)+'%';
+  if(pctEl.textContent!==ps) pctEl.textContent=ps;
+  requestAnimationFrame(masterLoop);
+})();
+
+/* occasional shooting stars */
+(function shootLoop(){
+  const s=document.createElement('div');
+  s.className='shoot';
+  s.style.left=(30+Math.random()*65)+'vw';
+  s.style.top=(Math.random()*30)+'vh';
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(),1600);
+  setTimeout(shootLoop,4000+Math.random()*7000);
+})();
+
+/* statement word-by-word reveal */
+(function(){
+  const h=document.getElementById('stmtH'); if(!h) return;
+  const words=h.textContent.trim().split(/\s+/);
+  h.innerHTML=words.map((w,i)=>'<span class="w"><i style="--i:'+i+'">'+w+'</i></span>').join(' ');
+  const sio=new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('in'); sio.unobserve(e.target); }
+  }),{threshold:.4});
+  sio.observe(document.getElementById('statement'));
+})();
+document.querySelectorAll('section.card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+    card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+  });
+});
+
+// restore previous session
+if(saved._calc){ renderSummary(); document.getElementById('restoreBtn').disabled=false; }
+update();
+/* build: radian-style v5 */
+</script>
+</body>
+</html>
