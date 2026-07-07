@@ -26,6 +26,16 @@ A cinematic, single-file web app that computes Vedic marriage compatibility from
 
 Just open `index.html` in any modern browser. No build step, no server needed.
 
+## Google Sheets logging (optional)
+
+The app can log each calculation (both persons' details, section scores, verdict, a persistent user ID, and approximate IP location) to your Google Sheet.
+
+1. Open the sheet → Extensions → Apps Script, paste the `doPost` function found in the comment block inside `index.html` (search for `GOOGLE SHEETS LOGGING`).
+2. Deploy → New deployment → **Web app** → Execute as *Me*, access *Anyone* → copy the `/exec` URL.
+3. Paste that URL into the `SHEET_WEBAPP_URL` constant in `index.html`.
+
+Location comes from ipapi.co on the client. A notice under the Calculate button tells users their submission may be saved — keep it there.
+
 ## Accuracy & disclaimer
 
 Planetary positions use low-precision series (Meeus / JPL approximate elements), accurate to about a degree — sufficient for sign and nakṣatra placement except very close to boundaries. Maṅgal Doṣa is judged from the Moon chart (Chandra Kuṇḍalī) since birth-place coordinates are not collected. If exact birth time is unknown, 12:00 works on most days but the Moon sign can shift on transition days.

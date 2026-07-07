@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Vedic marriage compatibility calculator — enter two birth details and get a full Aṣṭakoota Guṇa Milan, Nāḍī, Gaṇa, Bhakūṭa and Maṅgal Doṣa analysis with a unique interactive scorecard out of 100.">
+<meta name="theme-color" content="#050510">
+<meta property="og:title" content="Spouse Match Scorecard — Astro-Gyani Calculator">
+<meta property="og:description" content="Real Vedic Aṣṭakoota compatibility computed from both birth charts, presented as a cinematic interactive scorecard.">
+<meta property="og:type" content="website">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://ipapi.co https://script.google.com https://script.googleusercontent.com; base-uri 'self'; form-action 'self'">
 <title>Spouse Match Scorecard — Astro-Gyani Calculator</title>
 <style>
   :root{
@@ -49,13 +55,10 @@
     animation:shootAcross 1.4s ease-in forwards}
   @keyframes shootAcross{from{transform:translate(0,0) rotate(24deg);opacity:0}12%{opacity:1}to{transform:translate(-58vw,52vh) rotate(24deg);opacity:0}}
 
-  /* ── Themed animated scrollbar + progress ──── */
-  html{scrollbar-width:thin;scrollbar-color:#b8860b #050510}
-  ::-webkit-scrollbar{width:11px}
-  ::-webkit-scrollbar-track{background:#050510;border-left:1px solid rgba(255,255,255,.05)}
-  ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#f6e27a,#b8860b 60%,#7a5a08);border-radius:99px;
-    border:2px solid #050510;box-shadow:inset 0 0 6px rgba(255,243,196,.5)}
-  ::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#fff3c4,#e9c46a)}
+  /* ── Native scrollbar hidden — gold progress bar & % are the indicator ── */
+  html{scrollbar-width:none}
+  body{-ms-overflow-style:none}
+  ::-webkit-scrollbar{display:none;width:0;height:0}
   #scrollProgress{position:fixed;top:0;left:0;height:3px;width:0%;z-index:99;pointer-events:none;
     background:linear-gradient(90deg,#7a5a08,#e9c46a,#f6e27a);box-shadow:0 0 12px rgba(233,196,106,.8),0 0 4px rgba(233,196,106,1)}
   #scrollPct{position:fixed;right:20px;bottom:22px;z-index:96;font-size:11px;letter-spacing:2px;color:var(--muted);
@@ -148,6 +151,24 @@
   .scrub-desc.swap{opacity:0}
   .scrub-max{font-size:12px;letter-spacing:2px;color:var(--gold);margin-top:10px;text-transform:uppercase}
 
+  /* ── Back to top (animated) ────────────────── */
+  #toTop{position:fixed;right:22px;bottom:62px;z-index:95;width:52px;height:52px;border-radius:50%;cursor:pointer;
+    border:1px solid rgba(233,196,106,.5);background:rgba(20,18,42,.75);color:var(--gold);font-size:20px;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:translateY(24px) scale(.8);pointer-events:none;
+    transition:opacity .4s,transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,border-color .3s}
+  #toTop.show{opacity:1;transform:none;pointer-events:auto}
+  #toTop:hover{box-shadow:0 0 26px rgba(233,196,106,.5);border-color:var(--gold)}
+  #toTop:hover .arr{animation:arrUp .8s ease-in-out infinite}
+  #toTop .arr{display:inline-block;line-height:1}
+  #toTop .lbl{position:absolute;bottom:-18px;font-size:8.5px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+  @keyframes arrUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+  /* ── Koota illustration (scrub) ────────────── */
+  .scrub-img{width:118px;height:118px;margin:0 auto 14px;transition:opacity .25s,transform .3s cubic-bezier(.34,1.56,.64,1)}
+  .scrub-img.swap{opacity:0;transform:scale(.8) rotate(-6deg)}
+  .scrub-img svg{width:100%;height:100%;filter:drop-shadow(0 0 18px rgba(233,196,106,.3))}
+
   /* ── Big statement (word reveal) ───────────── */
   .statement{padding:16vh 0;text-align:center}
   .statement h2{font-size:clamp(30px,6vw,58px);font-weight:800;line-height:1.18;margin:0 auto;max-width:760px}
@@ -206,9 +227,8 @@
   .hud-msg{font-size:11.5px;color:var(--muted)}
   .minibar{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:7px}
   .minibar i{display:block;height:100%;width:0%;border-radius:99px;
-    background:linear-gradient(90deg,#f87171,#fbbf24,#4ade80);background-size:200% 100%;
-    transition:width .5s cubic-bezier(.22,1,.36,1);animation:shimmer 3s linear infinite}
-  @keyframes shimmer{to{background-position:-200% 0}}
+    background:linear-gradient(90deg,#f87171,#fbbf24,#4ade80);
+    transition:width .5s cubic-bezier(.22,1,.36,1)}
   .gate-pill{font-size:11px;font-weight:700;padding:7px 13px;border-radius:99px;border:1px solid var(--stroke);white-space:nowrap;transition:all .35s;background:var(--glass)}
   .gate-pill.pass{background:rgba(74,222,128,.12);color:var(--good);border-color:rgba(74,222,128,.4)}
   .gate-pill.fail{background:rgba(248,113,113,.12);color:var(--bad);border-color:rgba(248,113,113,.4);animation:pulse 1.6s infinite}
@@ -349,7 +369,7 @@
     body{background:#fff;color:#22203a}
     body::before,.orb,.hud,.toolbar,#stars,.mandala,.ornament,.banner,.form-card,.err,
     #grain,#vignette,#secCounter,.scrub,.statement,.scene,.scroll-cue,.hero-cta,
-    .nebula,.aurora,.shoot,#scrollProgress,#scrollPct{display:none!important}
+    .nebula,.aurora,.shoot,#scrollProgress,#scrollPct,#toTop,.godrays,.dawn{display:none!important}
     .hero{min-height:auto;width:auto;margin-left:0;padding:20px 0}
     h1.display .line i,.hero .sub,.eyebrow{animation:none;opacity:1;transform:none;color:#3a2f66;-webkit-text-fill-color:#3a2f66}
     section.card,#verdict,.use,.gate,#astro-summary{background:#fff;border:1px solid #ddd;box-shadow:none;backdrop-filter:none;break-inside:avoid;color:#22203a}
@@ -376,8 +396,9 @@
 <div id="scrollProgress"></div>
 <div id="scrollPct"><b id="scrollPctNum">0%</b></div>
 <div id="secCounter"><b id="secCounterNum">01</b>&nbsp;/&nbsp;<span id="secCounterTotal">08</span></div>
+<button id="toTop" aria-label="Back to top" title="Back to top"><span class="arr">↑</span><span class="lbl">ॐ top</span></button>
 
-<div class="page">
+<main class="page">
 
   <section class="hero" id="hero">
     <div class="scene">
@@ -452,24 +473,25 @@
       <div class="form-grid">
         <div class="person">
           <h3>Person 1 <span class="tag">groom / self</span></h3>
-          <div class="field"><label>Name</label><input id="p1name" type="text" placeholder="e.g. Mayank" value="Mayank" maxlength="40"></div>
-          <div class="field"><label>Date of birth</label><input id="p1date" type="date"></div>
-          <div class="field"><label>Time of birth (local)</label><input id="p1time" type="time" value="12:00"></div>
-          <div class="field"><label>Birth timezone</label><select id="p1tz"></select></div>
+          <div class="field"><label for="p1name">Name</label><input id="p1name" type="text" placeholder="e.g. Mayank" value="Mayank" maxlength="40"></div>
+          <div class="field"><label for="p1date">Date of birth</label><input id="p1date" type="date"></div>
+          <div class="field"><label for="p1time">Time of birth (local)</label><input id="p1time" type="time" value="12:00"></div>
+          <div class="field"><label for="p1tz">Birth timezone</label><select id="p1tz" aria-label="Person 1 birth timezone"></select></div>
         </div>
         <div class="person">
           <h3>Person 2 <span class="tag">bride / partner</span></h3>
-          <div class="field"><label>Name</label><input id="p2name" type="text" placeholder="Her name" maxlength="40"></div>
-          <div class="field"><label>Date of birth</label><input id="p2date" type="date"></div>
-          <div class="field"><label>Time of birth (local)</label><input id="p2time" type="time" value="12:00"></div>
-          <div class="field"><label>Birth timezone</label><select id="p2tz"></select></div>
+          <div class="field"><label for="p2name">Name</label><input id="p2name" type="text" placeholder="Her name" maxlength="40"></div>
+          <div class="field"><label for="p2date">Date of birth</label><input id="p2date" type="date"></div>
+          <div class="field"><label for="p2time">Time of birth (local)</label><input id="p2time" type="time" value="12:00"></div>
+          <div class="field"><label for="p2tz">Birth timezone</label><select id="p2tz" aria-label="Person 2 birth timezone"></select></div>
         </div>
       </div>
       <div class="calc-bar">
         <button class="btn primary big" onclick="calculate()">✨ Calculate Match</button>
       </div>
       <div class="err" id="formErr"></div>
-      <div class="calc-note">If exact birth time is unknown, keep 12:00 — the Moon sign is correct on most days, but may shift on Moon-transition days.</div>
+      <div class="calc-note">If exact birth time is unknown, keep 12:00 — the Moon sign is correct on most days, but may shift on Moon-transition days.<br>
+      By pressing Calculate, the entered details, scores, and your approximate location may be saved to the site owner's records.</div>
     </div>
   </section>
 
@@ -487,6 +509,7 @@
         <circle cx="280" cy="42" r="8" fill="none" stroke="rgba(233,196,106,.8)" stroke-width="1.5"/>
       </svg>
       <div class="scrub-copy">
+        <div class="scrub-img" id="scrubImg" aria-hidden="true"></div>
         <div class="scrub-counter"><b id="scrubIdx">01</b> / 08 · The Aṣṭakoota</div>
         <h2 class="scrub-title" id="scrubTitle">Varṇa</h2>
         <p class="scrub-desc" id="scrubDesc">Spiritual grain &amp; ego balance — does his nature respect hers?</p>
@@ -558,7 +581,7 @@
   <footer class="reveal">
     Astro-Gyani · classical Aṣṭakoota computed from approximate planetary positions (±1°, Lahiri ayanāṁśa, Moon-chart Maṅgal Doṣa; standard simplifications applied). A guide to think clearly — not a substitute for a professional jyotiṣī or your own judgment. Score both ways: each should find the other their best fit.
   </footer>
-</div>
+</main>
 
 <script>
 /* ═══════════════ ASTRONOMY ENGINE ═══════════════ */
@@ -857,7 +880,7 @@ DATA.forEach(sec=>{
         <div class="row-label">${it[0]}</div>
         <div class="row-ctrl">
           <span class="stars" id="st-${k}"></span>
-          <input type="range" min="0" max="${it[1]}" step="0.5" value="${v}" data-key="${k}" data-sec="${sec.id}" data-max="${it[1]}">
+          <input type="range" min="0" max="${it[1]}" step="0.5" value="${v}" data-key="${k}" data-sec="${sec.id}" data-max="${it[1]}" aria-label="${it[0].replace(/<[^>]*>/g,'')}">
           <span class="val" id="v-${k}">${v}/${it[1]}</span>
         </div>
       </div>`;
@@ -870,6 +893,51 @@ sliders.forEach(s=>s.addEventListener('input',()=>update(s.dataset.sec)));
 
 function herName(){ return (saved._inputs?.p2?.name||'').trim(); }
 function calcScores(){ return saved._calc?.scores||null; }
+
+/* ═══════════════ GOOGLE SHEETS LOGGING ═══════════════ */
+/* Setup (one-time): open your sheet → Extensions → Apps Script → paste:
+
+function doPost(e){
+  var d=JSON.parse(e.postData.contents);
+  SpreadsheetApp.openById('1rGpxfXJA5499kgLsb44zglEC4ZIrCI7E2VU1L34RkHw')
+    .getSheets()[0].appendRow([new Date(),d.userId,d.ip,d.city,d.region,d.country,
+      d.p1name,d.p1dob,d.p1time,d.p2name,d.p2dob,d.p2time,
+      d.guna,d.total,d.A,d.B,d.C,d.D,d.verdict]);
+  return ContentService.createTextOutput('ok');
+}
+
+   Deploy → New deployment → Web app → Execute as: Me → Access: Anyone,
+   then paste the /exec URL below. */
+const SHEET_WEBAPP_URL=''; // e.g. 'https://script.google.com/macros/s/AKfyc.../exec'
+
+function getUserId(){
+  if(!saved._uid){ saved._uid='u-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8); persist(); }
+  return saved._uid;
+}
+let geoCache=null;
+async function getGeo(){
+  if(geoCache) return geoCache;
+  try{ const r=await fetch('https://ipapi.co/json/'); geoCache=await r.json(); }
+  catch(e){ geoCache={}; }
+  return geoCache;
+}
+async function logToSheet(){
+  if(!SHEET_WEBAPP_URL||!saved._calc) return;
+  try{
+    const g=await getGeo();
+    const S=saved._calc.scores, inp=saved._inputs, m=saved._calc.meta;
+    const sum=p=>Object.keys(S).filter(k=>k[0]===p).reduce((a,k)=>a+S[k],0);
+    const total=Object.values(S).reduce((a,v)=>a+v,0);
+    await fetch(SHEET_WEBAPP_URL,{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({
+        userId:getUserId(),ip:g.ip||'',city:g.city||'',region:g.region||'',country:g.country_name||'',
+        p1name:inp.p1.name,p1dob:inp.p1.date,p1time:inp.p1.time,
+        p2name:inp.p2.name,p2dob:inp.p2.date,p2time:inp.p2.time,
+        guna:m.K.total,total:total,A:sum('A'),B:sum('B'),C:sum('C'),D:sum('D'),
+        verdict:total>=80?'Excellent':total>=65?'Strong':total>=50?'Mixed':'Poor'})});
+  }catch(e){/* logging must never break the app */}
+}
 
 /* ═══════════════ CALCULATE ═══════════════ */
 function readPerson(n){
@@ -902,6 +970,8 @@ function calculate(){
   renderSummary();
   persist();
   update();
+  if(typeof recalcLayout==='function') setTimeout(recalcLayout,50);
+  logToSheet();
   document.getElementById('astro-summary').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -1070,7 +1140,8 @@ function resetAll(){
 }
 
 /* ═══════════════ AMBIENCE ═══════════════ */
-(function(){ // starfield: 2 nodes total via box-shadow (fast)
+const whenIdle=window.requestIdleCallback||(f=>setTimeout(f,80));
+whenIdle(function(){ // starfield: 2 nodes total via box-shadow, built off the critical path
   const sky=document.getElementById('stars');
   function layer(n,cls){
     const d=document.createElement('div');
@@ -1084,7 +1155,7 @@ function resetAll(){
     sky.appendChild(d);
   }
   layer(42,'sl1'); layer(36,'sl2');
-})();
+});
 const io=new IntersectionObserver(entries=>{
   entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
 },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
@@ -1096,26 +1167,38 @@ const heroMandala=document.getElementById('heroMandala');
 const bannerSvgs=[...document.querySelectorAll('.banner svg')];
 const scrubEl=document.getElementById('scrub');
 const scrubWheel=document.getElementById('scrubWheel');
+const KI_G='stroke="#e9c46a" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"';
 const KOOTA_INFO=[
-  ['Varṇa','Spiritual grain & ego balance — does his nature respect hers?','worth 1 point'],
-  ['Vaśya','Mutual magnetism — the pull of influence between the two.','worth 2 points'],
-  ['Tārā','Birth-star destiny — health & fortune woven between the stars.','worth 3 points'],
-  ['Yoni','Instinctive & physical nature — the animal signs must agree.','worth 4 points'],
-  ['Graha Maitrī','Friendship of the Moon lords — the mental wavelength.','worth 5 points'],
-  ['Gaṇa','Temperament tribe — Deva, Manuṣya, or Rākṣasa.','worth 6 points'],
-  ['Bhakūṭa','Moon-sign geometry — prosperity & the growth of family.','worth 7 points'],
-  ['Nāḍī','The pulse of prāṇa — health of the lineage. The heaviest koota.','worth 8 points'],
+  ['Varṇa','Spiritual grain & ego balance — does his nature respect hers?','worth 1 point',
+   `<svg viewBox="0 0 120 120"><g ${KI_G}><path d="M60 78 C42 78 34 64 38 52 C46 58 52 58 60 50 C68 58 74 58 82 52 C86 64 78 78 60 78Z"/><path d="M60 50 C56 40 60 30 60 26 C60 30 64 40 60 50Z"/><circle cx="60" cy="92" r="4"/><path d="M28 92 Q60 104 92 92"/></g></svg>`],
+  ['Vaśya','Mutual magnetism — the pull of influence between the two.','worth 2 points',
+   `<svg viewBox="0 0 120 120"><g ${KI_G}><circle cx="40" cy="60" r="16"/><circle cx="80" cy="60" r="16"/><path d="M52 44 Q60 36 68 44"/><path d="M68 76 Q60 84 52 76"/><path d="M64 40 l4 4 -6 2"/><path d="M56 80 l-4 -4 6 -2"/></g></svg>`],
+  ['Tārā','Birth-star destiny — health & fortune woven between the stars.','worth 3 points',
+   `<svg viewBox="0 0 120 120"><g ${KI_G}><path d="M60 30 L66 54 L90 60 L66 66 L60 90 L54 66 L30 60 L54 54 Z"/><path d="M88 32 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z"/><path d="M30 86 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z"/></g></svg>`],
+  ['Yoni','Instinctive & physical nature — the animal signs must agree.','worth 4 points',
+   `<svg viewBox="0 0 120 120"><g ${KI_G}><ellipse cx="42" cy="72" rx="10" ry="13"/><circle cx="30" cy="52" r="4.5"/><circle cx="42" cy="46" r="4.5"/><circle cx="54" cy="52" r="4.5"/><ellipse cx="82" cy="70" rx="9" ry="12"/><circle cx="71" cy="52" r="4"/><circle cx="82" cy="47" r="4"/><circle cx="93" cy="52" r="4"/></g></svg>`],
+  ['Graha Maitrī','Friendship of the Moon lords — the mental wavelength.','worth 5 points',
+   `<svg viewBox="0 0 120 120"><g ${KI_G}><circle cx="38" cy="52" r="14"/><circle cx="84" cy="70" r="12"/><ellipse cx="84" cy="70" rx="22" ry="7" transform="rotate(-18 84 70)"/><path d="M50 62 Q62 70 72 66"/><path d="M68 62 l4 4 -6 2"/></g></svg>`],
+  ['Gaṇa','Temperament tribe — Deva, Manuṣya, or Rākṣasa.','worth 6 points',
+   `<svg viewBox="0 0 120 120"><g ${KI_G}><circle cx="34" cy="62" r="11"/><path d="M26 46 Q34 40 42 46"/><circle cx="60" cy="58" r="12"/><circle cx="88" cy="62" r="11"/><path d="M80 50 l-3 -8"/><path d="M96 50 l3 -8"/><path d="M28 88 Q60 98 92 88"/></g></svg>`],
+  ['Bhakūṭa','Moon-sign geometry — prosperity & the growth of family.','worth 7 points',
+   `<svg viewBox="0 0 120 120"><g ${KI_G}><path d="M44 36 a20 20 0 1 0 12 36 a16 16 0 1 1 -12 -36z"/><path d="M78 44 a16 16 0 1 1 -10 28 a13 13 0 1 0 10 -28z"/><path d="M36 88 Q60 76 86 88"/></g></svg>`],
+  ['Nāḍī','The pulse of prāṇa — health of the lineage. The heaviest koota.','worth 8 points',
+   `<svg viewBox="0 0 120 120"><g ${KI_G}><path d="M22 62 H42 L50 44 L62 80 L70 56 L76 62 H98"/><circle cx="60" cy="30" r="5"/><path d="M60 92 c-8 -6 -8 -14 0 -18 c8 4 8 12 0 18z"/></g></svg>`],
 ];
 let scrubLast=-1;
+const scrubImgEl=document.getElementById('scrubImg');
+scrubImgEl.innerHTML=KOOTA_INFO[0][3];
 function swapScrub(idx){
   const t=document.getElementById('scrubTitle'),d=document.getElementById('scrubDesc'),
         c=document.getElementById('scrubIdx'),m=document.getElementById('scrubMax');
-  t.classList.add('swap'); d.classList.add('swap');
+  t.classList.add('swap'); d.classList.add('swap'); scrubImgEl.classList.add('swap');
   setTimeout(()=>{
     const k=KOOTA_INFO[idx];
     c.textContent=String(idx+1).padStart(2,'0');
     t.textContent=k[0]; d.textContent=k[1]; m.textContent=k[2];
-    t.classList.remove('swap'); d.classList.remove('swap');
+    scrubImgEl.innerHTML=k[3];
+    t.classList.remove('swap'); d.classList.remove('swap'); scrubImgEl.classList.remove('swap');
   },200);
 }
 // section counter
@@ -1124,51 +1207,57 @@ document.getElementById('secCounterTotal').textContent=String(secList.length).pa
 const cntEl=document.getElementById('secCounterNum');
 const progBar=document.getElementById('scrollProgress');
 const pctEl=document.getElementById('scrollPctNum');
+const toTopBtn=document.getElementById('toTop');
+toTopBtn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
 let curY=window.scrollY, lastY=-1;
+let secTops=[], docH=1;
+function recalcLayout(){
+  secTops=secList.map(s=>s.offsetTop);
+  docH=Math.max(1,document.documentElement.scrollHeight-window.innerHeight);
+}
+recalcLayout();
+window.addEventListener('resize',recalcLayout,{passive:true});
 (function masterLoop(){
   const target=window.scrollY;
   curY=lerp(curY,target,.09);
   if(Math.abs(curY-target)<.1) curY=target;
-  if(curY===lastY){ requestAnimationFrame(masterLoop); return; } // idle: skip all DOM work
+  if(curY===lastY){ requestAnimationFrame(masterLoop); return; } // idle: zero DOM work
   lastY=curY;
   const vh=window.innerHeight;
+  /* READ phase — all layout reads together (no forced reflow) */
+  const bannerRects=bannerSvgs.map(sv=>sv.parentElement.getBoundingClientRect());
+  const scrubRect=scrubEl?scrubEl.getBoundingClientRect():null;
+  /* WRITE phase — style updates only */
   layers.forEach(l=>l.style.transform='translateX(-50%) translateY('+(curY*+l.dataset.p)+'px)');
   if(heroMandala&&curY<vh*1.4)
     heroMandala.style.transform='translate(-50%,-50%) rotate('+(curY*.05)+'deg) scale('+(1+curY*.0003)+')';
-  // banner image parallax (drift inside mask, Radian-style)
-  bannerSvgs.forEach(sv=>{
-    const r=sv.parentElement.getBoundingClientRect();
+  bannerSvgs.forEach((sv,i)=>{
+    const r=bannerRects[i];
     if(r.bottom<-40||r.top>vh+40) return;
     const p=(vh-r.top)/(vh+r.height);
     sv.style.transform='translateY('+((p-.5)*30)+'px) scale(1.18)';
   });
-  // pinned scrub
-  if(scrubEl){
-    const r=scrubEl.getBoundingClientRect();
-    if(r.top<vh&&r.bottom>0){
-      const p=Math.min(1,Math.max(0,-r.top/(r.height-vh)));
-      scrubWheel.style.transform='rotate('+(p*360)+'deg)';
-      const idx=Math.min(7,Math.floor(p*8));
-      if(idx!==scrubLast){ scrubLast=idx; if(idx>=0) swapScrub(idx); }
-    }
+  if(scrubRect&&scrubRect.top<vh&&scrubRect.bottom>0){
+    const p=Math.min(1,Math.max(0,-scrubRect.top/(scrubRect.height-vh)));
+    scrubWheel.style.transform='rotate('+(p*360)+'deg)';
+    const idx=Math.min(7,Math.floor(p*8));
+    if(idx!==scrubLast){ scrubLast=idx; if(idx>=0) swapScrub(idx); }
   }
-  // section counter
   const mid=curY+vh*.45;
   let ci=0;
-  for(let i=0;i<secList.length;i++){ if(secList[i].offsetTop<=mid) ci=i; }
+  for(let i=0;i<secTops.length;i++){ if(secTops[i]<=mid) ci=i; }
   const cs=String(ci+1).padStart(2,'0');
   if(cntEl.textContent!==cs) cntEl.textContent=cs;
-  // scroll progress bar + percentage (Genesis-style)
-  const docH=document.documentElement.scrollHeight-vh;
-  const prog=docH>0?Math.min(1,Math.max(0,curY/docH)):0;
+  const prog=Math.min(1,Math.max(0,curY/docH));
   progBar.style.width=(prog*100)+'%';
   const ps=Math.round(prog*100)+'%';
   if(pctEl.textContent!==ps) pctEl.textContent=ps;
+  toTopBtn.classList.toggle('show',curY>vh*.9);
   requestAnimationFrame(masterLoop);
 })();
 
-/* occasional shooting stars */
-(function shootLoop(){
+/* occasional shooting stars — starts after idle, never blocks load */
+function shootLoop(){
   const s=document.createElement('div');
   s.className='shoot';
   s.style.left=(30+Math.random()*65)+'vw';
@@ -1176,7 +1265,8 @@ let curY=window.scrollY, lastY=-1;
   document.body.appendChild(s);
   setTimeout(()=>s.remove(),1600);
   setTimeout(shootLoop,4000+Math.random()*7000);
-})();
+}
+whenIdle(()=>setTimeout(shootLoop,2500));
 
 /* statement word-by-word reveal */
 (function(){
@@ -1199,7 +1289,7 @@ document.querySelectorAll('section.card').forEach(card=>{
 // restore previous session
 if(saved._calc){ renderSummary(); document.getElementById('restoreBtn').disabled=false; }
 update();
-/* build: radian-style v5 */
+/* build: v6 — genesis bg, sheets logging, a11y, perf */
 </script>
 </body>
 </html>
